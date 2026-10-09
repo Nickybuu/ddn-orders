@@ -1021,8 +1021,8 @@ var O5ORDER = (function () {
           '<span class="o5-mn">' + esc(it.num) + '</span><span>' + esc(it.first) + '</span><span>' + esc(it.last) + '</span><span>' + esc(it.pos) + '</span><span class="o5-mr">' + esc(it.role) + '</span>' +
           (it.sub ? '<span class="o5-ms">' + esc(it.sub) + '</span>' : '') + '</div>';
       }
-      case 'd': return '<p class="o5-d tj' + (it.label ? ' o5-dl' : '') + '"' + TIGHT + (it.label ? ' data-label="' + esc(it.label) + '"' : '') + (it.num ? ' data-num="' + esc(it.num) + '"' : '') + '>' +
-        (it.num ? '<span class="o5-nn">' + esc(it.num) + ' </span>' : '') + esc(it.t) + '</p>';   // เลขข้อ + ช่องว่าง ไม่ถูกเติมช่องไฟตอนจัดกระจาย → ข้อความบรรทัดแรกเริ่มตรงกับบรรทัดที่ขึ้นใหม่เป๊ะ
+      case 'd': return '<p class="o5-d tj' + (it.label ? ' o5-dl' : '') + '"' + TIGHT + (it.t.indexOf('\n') >= 0 ? ' data-brj="1"' : '') + (it.label ? ' data-label="' + esc(it.label) + '"' : '') + (it.num ? ' data-num="' + esc(it.num) + '"' : '') + '>' +
+        (it.num ? '<span class="o5-nn">' + esc(it.num) + ' </span>' : '') + esc(it.t).replace(/\n/g, '<br>') + '</p>';   // เลขข้อ + ช่องว่าง ไม่ถูกเติมช่องไฟตอนจัดกระจาย → ข้อความบรรทัดแรกเริ่มตรงกับบรรทัดที่ขึ้นใหม่เป๊ะ
       case 'from': return '<p class="o5-p tj"' + TIGHT + '>' + esc(it.t) + '</p>';
       case 'date': return '<div class="o5-date"' + (it.sp ? ' style="margin-top:' + mm(it.sp * 25.4 / 72) + '"' : '') + '>' + esc(it.t) + '</div>';
       case 'sign': return '<div class="o5-sign"><div>' + esc(it.name) + '</div><div>' + esc(it.pos) + '</div></div>';
@@ -1238,12 +1238,15 @@ var O5DOCX = (function () {
           break;
         }
         case 'd': {
-          var runs2 = [], left = it.num ? dN : dT;
+          var runs2 = [], left = it.num ? dN : dT, segs = String(it.t).split('\n');   // \n = ขึ้นบรรทัดใหม่ในข้อเดิม (บรรทัดต่อเริ่มตรงข้อความหลังเลขข้อ)
           if (it.label) runs2.push(R(it.label, true), TAB);
           if (it.num) runs2.push(R(it.num), TAB);
-          runs2.push(RT(glue(it.t), it));
-          out.push(P({ jc: 'thaiDistribute', widow: true, tabs: [{ pos: dT }].concat(it.num ? [{ pos: dN }] : []), left: left,
+          runs2.push(RT(glue(segs[0]), it));
+          out.push(P({ jc: 'thaiDistribute', widow: true, keepNext: segs.length > 1, keepLines: segs.length > 1, tabs: [{ pos: dT }].concat(it.num ? [{ pos: dN }] : []), left: left,
             hang: it.label ? left - tw(G.dLab) : left - dT, runs: runs2 }));
+          segs.slice(1).forEach(function (seg, si) {
+            out.push(P({ jc: 'thaiDistribute', widow: true, keepNext: si < segs.length - 2, keepLines: true, left: left, runs: [RT(glue(seg), it)] }));
+          });
           break;
         }
         case 'date': out.push(P({ keepNext: true, before: it.sp ? tw(it.sp * 25.4 / 72) : 0, left: tw(G.dateX), runs: [R(glue(it.t))] })); break;
@@ -1361,7 +1364,7 @@ function chrome(on) { ['prev', 'acts', 'tabs'].forEach(function (id) { $(id).cla
 var PARA = { intro: 1, close: 1 };                    // ย่อหน้านำ/ข้อความปิด: เว้นบรรทัดว่าง = ย่อหน้าใหม่ · ขึ้นบรรทัดธรรมดา = ขึ้นบรรทัดต่อในย่อหน้าเดิม
 function sheetVal(o, k) { var v = o[k]; return Array.isArray(v) ? v.join(PARA[k] ? '\n\n' : '\n') : String(v == null ? '' : v); }
 function lns(v) { return String(v).split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean); }
-function paras(v) { return String(v).split(/\r?\n[ \t]*(?:\r?\n[ \t]*)+/).map(lns).filter(function (l) { return l.length; }).map(function (l) { return l.join('\n'); }); }
+function paras(v) { return String(v).replace(/\n[ \t]*↵[ \t]*/g, '\n').replace(/[ \t]*↵[ \t]*/g, '\n').split(/\r?\n[ \t]*(?:\r?\n[ \t]*)+/).map(lns).filter(function (l) { return l.length; }).map(function (l) { return l.join('\n'); }); }
 /** ฉบับที่ใช้สร้างหน้า = ข้อมูลจากชีต + ข้อความที่แก้เองในหน้านี้ */
 function effOrder() {
   var o = cur(); if (!o) return null;
