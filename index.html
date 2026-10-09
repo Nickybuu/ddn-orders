@@ -127,6 +127,9 @@ textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radiu
    - แตะแก้ข้อความ: คลิก/เลือกข้อความได้ตามปกติ · เมื่อเริ่มพิมพ์ วาง ตัด ลาก ทั้งหน้าประกาศกลับเป็นข้อความปกติ (ชิดซ้าย) ระหว่างแก้
      คลิกนอกหน้าประกาศ / กดพิมพ์ / ดาวน์โหลด Word แล้วจัดใหม่เอง · ย้อนกลับ (Ctrl+Z) ได้ระหว่างแก้ แต่ไม่ข้ามการจัดใหม่
      (จัดใหม่หลังแก้ = สลับหน้าประกาศเป็นสำเนา ประวัติย้อนกลับเดิมของเบราว์เซอร์จึงไม่ย้อนข้อความเก่ามาซ้ำ/เพี้ยน)
+   - บีบช่องไฟเพื่อดึงคำที่ตกอยู่บรรทัดท้ายสั้น ๆ ขึ้นไปอยู่บรรทัดก่อนหน้า (ไม่บังคับ — เปิดเฉพาะย่อหน้าที่ใส่ data-tight="เท่าของขนาดตัวอักษร" เช่น 0.02):
+     ใช้เมื่อบรรทัดสุดท้ายสั้นไม่เกิน TIGHT_ORPH ของความกว้างบรรทัด และบีบแล้วจำนวนบรรทัดลดลง 1 · ลองบีบจากน้อยไปมาก (¼ ½ ¾ เต็ม ของค่าที่ตั้ง) เอาค่าน้อยสุดที่ได้ผล
+     บรรทัดที่ไม่ต้องบีบยังกระจายตามปกติ · ย่อหน้าที่มีขึ้นบรรทัดใหม่เอง (<br>) ไม่บีบ · el._tj.tight = ค่าที่บีบจริง (0 = ไม่บีบ)
    - เบราว์เซอร์เก่าที่ไม่มี Intl.Segmenter หรือเติมช่องไฟแยกสระ/วรรณยุกต์ (Safari บางรุ่น): ปล่อยชิดซ้ายเหมือนเดิม (ไม่มีข้อผิดพลาด) */
 var DDNJUST = (function () {
   'use strict';
@@ -156,13 +159,15 @@ var DDNJUST = (function () {
     'เครื่องบันทึกภาพ เครื่องบันทึกเสียง เครื่องมือสื่อสาร สิ่งแวดล้อม เทคโนโลยี วิทยาศาสตร์ คณิตศาสตร์ ภาษาอังกฤษ ' +
     'ภาษาต่างประเทศ ภาษาจีน ภาษาญี่ปุ่น')
     .split(' ').sort(function (a, b) { return b.length - a.length; }).join('|').replace(/-/g, '\\-'), 'y'); // y = ตรวจทีละตำแหน่ง (คำซ้อนกันได้ เช่น ประจำปีการศึกษา)
+  var TIGHT_ORPH = 0.2;                      // บรรทัดสุดท้ายสั้นไม่เกินนี้ (เท่าของความกว้างบรรทัด) ถึงจะลองบีบ
+  var TIGHT_STEPS = [0.25, 0.5, 0.75, 1];    // ลองบีบทีละขั้น (เท่าของ data-tight) เอาขั้นน้อยสุดที่ได้ผล
   var MAXLS = 0.15;  // ช่องไฟที่เพิ่มได้สูงสุด (เท่าของขนาดตัวอักษร) — เกินนี้บรรทัดนั้นชิดซ้ายแทน (เกิดได้เฉพาะคำยาวมากที่ตัดไม่ได้)
   /** สไตล์ที่ตัวจัดบรรทัดต้องการ (ไม่พึ่ง CSS ของหน้า): ระหว่างวัด/ในบรรทัดที่จัดแล้ว ห้ามตัดบรรทัดในชิ้นย่อย (ตัวหนา ข้อความที่วาง ฯลฯ) */
   var CSS = '.tj-meas,.tj-meas *,.tj-l,.tj-l *{white-space:nowrap!important}.tj-l{display:block!important;text-indent:0!important}.tj-z{letter-spacing:0!important}' +
     '.tj-editing p *,.tj-editing .cit *,.tj-editing li *{white-space:normal!important}'; // ระหว่างแก้ ให้ตัดบรรทัดได้ทุกที่ (พิมพ์ต่อท้ายวลีห้ามฉีกไม่ล้นขอบ)
   /** สไตล์จัดหน้าที่อาจติดมากับข้อความเมื่อแก้ข้ามย่อหน้า/วางข้อความ → ลบทิ้งก่อนจัด */
   var LEAK = ['letter-spacing', 'white-space', 'white-space-collapse', 'text-wrap', 'text-wrap-mode', 'text-indent', 'display', 'margin-left', 'width', 'text-align'];
-  var NID = 0, KEY = 0, FONTWAIT = false, PRINT = null, LSOK = null;
+  var NID = 0, KEY = 0, FONTWAIT = false, PRINT = null, LSOK = null, NOTIGHT = false;
 
   function px(v) { var n = parseFloat(v); return isFinite(n) ? n : 0; }
   /** เบราว์เซอร์เติมช่องไฟ (letter-spacing) ทีละกลุ่มอักษรหรือไม่ — WebKit/Safari บางรุ่นเติมทุก glyph รวมสระ/วรรณยุกต์
@@ -276,19 +281,20 @@ var DDNJUST = (function () {
 
   /** เลือกจุดตัดบรรทัด: จำนวนบรรทัดน้อยที่สุดก่อน แล้วรวม (ช่องว่างท้ายบรรทัด/ความกว้าง)³ ของบรรทัดที่ไม่ใช่บรรทัดสุดท้ายให้น้อยที่สุด
       คืน null ถ้ามีหน่วยที่ยาวเกินบรรทัด (ปล่อยให้เบราว์เซอร์จัดเอง ไม่ให้ล้นขอบ) */
-  function plan(U, A0, A) {
+  function plan(U, A0, A, t) {   // t = ช่องไฟที่บีบได้ต่อ 1 กลุ่มอักษร (px · 0 = ไม่บีบ) → บรรทัดยาวเกินขอบได้ t × (จำนวนกลุ่มอักษร − 2)
+    t = t || 0;
     var n = U.length, best = [], prev = [], EPS = 0.6;
     for (var u = 0; u < n; u++) if (U[u].w > Math.max(A0, A) + EPS) return null;
     for (var x = 0; x <= n; x++) best[x] = Infinity;
     best[0] = 0;
     for (var i = 0; i < n; i++) {
       if (best[i] === Infinity) continue;
-      var av = i === 0 ? A0 : A, w = 0;
+      var av = i === 0 ? A0 : A, w = 0, g = 0;
       for (var j = i; j < n; j++) {
-        w += (j > i ? U[j - 1].s : 0) + U[j].w;
-        if (w > av + EPS && j > i) break;
-        var last = j === n - 1 || U[j].f, r = Math.max(0, av - w) / av;
-        var c = best[i] + 1e6 + (last ? 0 : 1000 * r * r * r + (U[j].q === 3 ? 1 : U[j].e < U[j].b ? 0 : 0.3)); // ตัดที่เว้นวรรคดีกว่าตัดกลางวลีเล็กน้อย · จุดไม่ค่อยดี = เท่าบรรทัดห่าง 10%
+        w += (j > i ? U[j - 1].s : 0) + U[j].w; g += U[j].g || 0;
+        if (w > av + EPS + (t > 0 ? t * Math.max(0, g - 2) : 0) && j > i) break;
+        var last = j === n - 1 || U[j].f, r = t > 0 ? Math.abs(av - w) / av : Math.max(0, av - w) / av, ov = t > 0 && w > av ? (w - av) / av : 0;
+        var c = best[i] + 1e6 + 8000 * ov * ov + (last ? 0 : 1000 * r * r * r + (U[j].q === 3 ? 1 : U[j].e < U[j].b ? 0 : 0.3)); // ตัดที่เว้นวรรคดีกว่าตัดกลางวลีเล็กน้อย · จุดไม่ค่อยดี = เท่าบรรทัดห่าง 10%
         if (c < best[j + 1]) { best[j + 1] = c; prev[j + 1] = i; }
         if (U[j].f) break;
       }
@@ -344,13 +350,21 @@ var DDNJUST = (function () {
       k = zoomOf(el);
       var cw = el.getBoundingClientRect().width / k - px(cs.paddingLeft) - px(cs.paddingRight) - px(cs.borderLeftWidth) - px(cs.borderRightWidth);
       var ti = px(cs.textIndent), full = Math.max(cw, cw - ti) + 0.6;
-      var mk = function () { U = units(m, breaks(m)); U.forEach(function (u) { u.w = width(m, u.a, u.e) / k; u.s = u.e < u.b && !u.f ? width(m, u.e, u.e + 1) / k : 0; }); };
+      var mk = function () { U = units(m, breaks(m)); U.forEach(function (u) { u.w = width(m, u.a, u.e) / k; u.s = u.e < u.b && !u.f ? width(m, u.e, u.e + 1) / k : 0; u.g = Array.from(SEGG.segment(m.S.slice(u.a, u.b))).length; }); };
       mk();
       var wide = {}; // วลีห้ามฉีกที่ยาวเกินบรรทัด (เช่น พิมพ์ต่อท้ายวลีท้ายย่อหน้า) → ยอมให้ตัดภายในวลีนั้น
       U.forEach(function (u) { if (u.w > full) for (var i = u.a; i < u.e; i++) if (m.NW[i]) wide[m.NW[i]] = 1; });
       if (Object.keys(wide).length) { m.NW = m.NW.map(function (x) { return wide[x] ? 0 : x; }); mk(); }
-      var cut = cw > 20 ? plan(U, cw - ti, cw) : null;
-      if (cut) res = { cw: cw, ti: ti, cut: cut };
+      var cut = cw > 20 ? plan(U, cw - ti, cw) : null, tg = 0, tmax = NOTIGHT ? 0 : parseFloat(el.getAttribute('data-tight')) || 0;
+      if (cut && cut.length > 1 && tmax > 0 && m.S.indexOf('\n') < 0) { // บรรทัดสุดท้ายสั้น (คำตกท้าย) → ลองบีบช่องไฟให้ขึ้นไปอยู่บรรทัดก่อนหน้า
+        var q0 = cut[cut.length - 1], wl = 0, q;
+        for (q = q0; q < U.length; q++) wl += (q > q0 ? U[q - 1].s : 0) + U[q].w;
+        if (wl <= TIGHT_ORPH * cw) for (q = 0; q < TIGHT_STEPS.length; q++) {
+          var t2 = tmax * TIGHT_STEPS[q], c2 = plan(U, cw - ti, cw, t2 * (px(cs.fontSize) || 16));
+          if (c2 && c2.length < cut.length) { cut = c2; tg = t2; break; }
+        }
+      }
+      if (cut) res = { cw: cw, ti: ti, cut: cut, tight: tg, tmax: tmax };
     } catch (e) { res = null; if (W.console) console.warn('DDNJUST', e); }
     el.classList.remove('tj-meas');
     if (!res || res.cut.length < 2) { strip(el); return false; } // บรรทัดเดียว / มีคำยาวเกินบรรทัด → ไม่ต้องจัด
@@ -372,7 +386,7 @@ var DDNJUST = (function () {
       var sp = D.createElement('span'); sp.className = 'tj-l';
       sp.style.cssText = 'display:block;white-space:nowrap;text-indent:0' + (L === 0 && res.ti ? ';margin-left:' + res.ti.toFixed(3) + 'px' : '');
       sp.appendChild(ln.frag); el.appendChild(sp); ln.el = sp;
-      ln.n = !ln.last && lastCluster(sp) ? gaps(sp) : 0;
+      ln.n = (!ln.last || res.tight) && lastCluster(sp) ? gaps(sp) : 0;   // บรรทัดสุดท้ายไม่กระจาย (ยกเว้นตอนบีบ: ย่อเฉพาะที่ล้นขอบ)
     });
     // ช่องไฟ: วัดความกว้างจริงของแต่ละบรรทัด → เติมช่องไฟเท่ากันทุกตัวให้พอดีขอบขวา → วัดซ้ำแล้วปรับให้ตรงอีกครั้ง
     var meas = function (ln) { var r = D.createRange(); r.selectNodeContents(ln.el); return r.getBoundingClientRect().width / k; };
@@ -380,6 +394,8 @@ var DDNJUST = (function () {
     lines.forEach(function (ln) {
       if (!(ln.n > 0)) return;
       ln.ls = (ln.av - ln.w0) / ln.n;
+      if (ln.last && ln.ls >= 0) { ln.n = 0; return; }                // บรรทัดสุดท้ายที่ไม่ล้น = ชิดซ้ายตามปกติ
+      if (res.tight && ln.ls < -res.tmax * fs * 1.05) ln.bad = 1;     // บีบเกินที่ตั้ง (วัดเพี้ยน) → จัดใหม่โดยไม่บีบ
       if (ln.ls > MAXLS * fs || ln.ls < -0.03 * fs) { ln.n = 0; return; }
       ln.el.style.letterSpacing = ln.ls.toFixed(3) + 'px';
     });
@@ -389,7 +405,11 @@ var DDNJUST = (function () {
       var ls = ln.ls * (ln.av - ln.w0) / (ln.w1 - ln.w0);
       if (Math.abs(ls - ln.ls) > 0.0005) ln.el.style.letterSpacing = ls.toFixed(3) + 'px';
     });
-    el._tj = { lines: lines.length };
+    if (res.tight && lines.some(function (ln) { return ln.bad; })) { // บีบแล้วเกินเพดาน → ยกเลิก จัดแบบปกติ
+      plain(el); NOTIGHT = true;
+      try { return justify(el); } finally { NOTIGHT = false; }
+    }
+    el._tj = { lines: lines.length, tight: res.tight || 0 };
     el.classList.add('tj-on');
     if (D.fonts && D.fonts.status === 'loading' && !FONTWAIT) { // ฟอนต์ยังโหลดไม่เสร็จ → จัดใหม่เมื่อโหลดเสร็จ
       FONTWAIT = true;
@@ -919,6 +939,7 @@ var O5ORDER = (function () {
     dateX: 45,                                                    // "สั่ง ณ วันที่"
     signX: 70, signW: 80, signGap: 3,                             // กล่องลงนาม (ข้อความกึ่งกลาง) · เว้น 3 บรรทัดก่อนชื่อ
     sep: 40,                                                      // เส้นคั่นใต้เรื่อง (จำนวนขีด)
+ tight: 0.02,                                                   // บีบช่องไฟได้สูงสุด (เท่าของขนาดตัวอักษร ≈ 0.3 pt ที่ 16 pt) เพื่อดึงคำที่ตกท้ายย่อหน้าขึ้นไปอยู่บรรทัดก่อนหน้า · 0 = ไม่บีบ
     spClose: 9, spDate: 6                                         // เว้นก่อนย่อหน้าข้อความปิด / ก่อน "สั่ง ณ วันที่" (พอยต์ · ตามคำสั่งจริงปีก่อน: เว้นก่อนข้อความปิด ≈ 9 pt · spacing before ของ สั่ง ณ วันที่ = 6 pt) · การขึ้นบรรทัดใหม่ในย่อหน้า (Enter) ไม่เว้น
   };
   G.line = G.fs * G.lh * 25.4 / 72;                               // 1 บรรทัด ≈ 6.3 มม.
@@ -985,12 +1006,13 @@ var O5ORDER = (function () {
   /* ---------------- หน้าเว็บ ---------------- */
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function mm(v) { return (Math.round(v * 1000) / 1000) + 'mm'; }
+  var TIGHT = G.tight > 0 ? ' data-tight="' + G.tight + '"' : '';
   function itemHtml(it, cols, opts) {
     switch (it.k) {
       case 'crest': return '<div class="o5-crest">' + (opts.crest ? '<img alt="" src="' + esc(opts.crest) + '">' : '') + '</div>';
       case 'title': case 'no': case 'subj': return '<div class="o5-c o5-b">' + esc(it.t) + '</div>';
       case 'sep': return '<div class="o5-c o5-sep">' + it.t + '</div>';
-      case 'p': return '<p class="o5-p tj"' + (it.t.indexOf('\n') >= 0 ? ' data-brj="1"' : '') + (it.sp ? ' style="margin-top:' + mm(it.sp * 25.4 / 72) + '"' : '') + '>' + esc(it.t).replace(/\n/g, '<br>') + '</p>';   // \n = ขึ้นบรรทัดใหม่ในย่อหน้าเดิม (บรรทัดต่อไปชิดขอบซ้าย ไม่ย่อหน้า)
+      case 'p': return '<p class="o5-p tj"' + TIGHT + (it.t.indexOf('\n') >= 0 ? ' data-brj="1"' : '') + (it.sp ? ' style="margin-top:' + mm(it.sp * 25.4 / 72) + '"' : '') + '>' + esc(it.t).replace(/\n/g, '<br>') + '</p>';   // \n = ขึ้นบรรทัดใหม่ในย่อหน้าเดิม (บรรทัดต่อไปชิดขอบซ้าย ไม่ย่อหน้า)
       case 'ch': return '<div class="o5-ch o5-b"><span class="o5-chn">' + esc(it.num) + '</span>' + esc(it.t) + '</div>';
       case 'm': {
         var x = cols.x, w = [x[1] - x[0], x[2] - x[1], x[3] - x[2], x[4] - x[3], G.tw - x[4]];
@@ -999,9 +1021,9 @@ var O5ORDER = (function () {
           '<span class="o5-mn">' + esc(it.num) + '</span><span>' + esc(it.first) + '</span><span>' + esc(it.last) + '</span><span>' + esc(it.pos) + '</span><span class="o5-mr">' + esc(it.role) + '</span>' +
           (it.sub ? '<span class="o5-ms">' + esc(it.sub) + '</span>' : '') + '</div>';
       }
-      case 'd': return '<p class="o5-d tj' + (it.label ? ' o5-dl' : '') + '"' + (it.label ? ' data-label="' + esc(it.label) + '"' : '') + (it.num ? ' data-num="' + esc(it.num) + '"' : '') + '>' +
+      case 'd': return '<p class="o5-d tj' + (it.label ? ' o5-dl' : '') + '"' + TIGHT + (it.label ? ' data-label="' + esc(it.label) + '"' : '') + (it.num ? ' data-num="' + esc(it.num) + '"' : '') + '>' +
         (it.num ? '<span class="o5-nn">' + esc(it.num) + ' </span>' : '') + esc(it.t) + '</p>';   // เลขข้อ + ช่องว่าง ไม่ถูกเติมช่องไฟตอนจัดกระจาย → ข้อความบรรทัดแรกเริ่มตรงกับบรรทัดที่ขึ้นใหม่เป๊ะ
-      case 'from': return '<p class="o5-p tj">' + esc(it.t) + '</p>';
+      case 'from': return '<p class="o5-p tj"' + TIGHT + '>' + esc(it.t) + '</p>';
       case 'date': return '<div class="o5-date"' + (it.sp ? ' style="margin-top:' + mm(it.sp * 25.4 / 72) + '"' : '') + '>' + esc(it.t) + '</div>';
       case 'sign': return '<div class="o5-sign"><div>' + esc(it.name) + '</div><div>' + esc(it.pos) + '</div></div>';
       case 'dept': return '<div class="o5-dept">' + esc(it.t) + '</div>';
@@ -1057,14 +1079,14 @@ var O5ORDER = (function () {
     var els = [].slice.call(flow.children);
     // 2) จัดกระจายแบบไทย (ย่อหน้าที่จัดได้ แยกเป็นบรรทัด span.tj-l แบ่งข้ามหน้าทีละบรรทัดได้)
     var J = typeof DDNJUST !== 'undefined' && DDNJUST.ok ? DDNJUST : null;
-    els.forEach(function (e) {
+    els.forEach(function (e, ei) {
       if (!e.classList.contains('tj')) return;
       if (e.hasAttribute('data-num')) { // ข้อหน้าที่: บรรทัดถัดไปเยื้องตรงกับข้อความหลังเลขข้อ
         var sp = doc.createElement('span'); sp.style.whiteSpace = 'pre'; sp.textContent = e.getAttribute('data-num') + ' ';
         e.insertBefore(sp, e.firstChild); var hw = sp.getBoundingClientRect().width / Z; e.removeChild(sp); e.normalize();
         e.style.paddingLeft = (G.dInd * MM + hw) + 'px'; e.style.textIndent = (-hw) + 'px';
       }
-      if (J) J.justify(e);
+      if (J && J.justify(e) && e._tj && e._tj.tight) items[ei].tight = e._tj.tight;   // ย่อหน้าที่บีบช่องไฟ → ไฟล์ Word บีบเท่ากัน
     });
     // 3) ชิ้นสำหรับแบ่งหน้า (atom) + ส่วนสูง + กติกาติดกัน (glue = ต้องอยู่หน้าเดียวกับชิ้นถัดไป)
     var atoms = [];
@@ -1169,6 +1191,8 @@ var O5DOCX = (function () {
     return p;
   }
   function R(t, b) { return { t: t, b: !!b, i: false, u: false, sz: 32, ls: 0 }; }
+  /** ข้อความย่อหน้าที่หน้าเว็บบีบช่องไฟ (it.tight เท่าของขนาดตัวอักษร) → บีบเท่ากันใน Word (หน่วย 1/20 pt · 16 pt) */
+  function RT(t, it) { var r = R(t); if (it && it.tight > 0) r.ls = -Math.max(1, Math.round(it.tight * 16 * 20)); return r; }
   var TAB = { tab: true };
   function b64(s) {
     if (typeof atob === 'function') { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
@@ -1200,7 +1224,7 @@ var O5DOCX = (function () {
         case 'p': case 'from': {
           var close = it.close && (nx.k === 'date' || nx.k === 'from') || it.k === 'from';
           String(it.t).split('\n').forEach(function (seg, si, arr) {   // บรรทัดที่ขึ้นใหม่ในย่อหน้า: ชิดขอบซ้าย ไม่เว้นหัวย่อหน้า
-            out.push(P({ jc: 'thaiDistribute', first: si ? 0 : tw(G.ind), before: !si && it.sp ? tw(it.sp * 25.4 / 72) : 0, widow: true, keepNext: close || si < arr.length - 1, keepLines: close || arr.length > 1, runs: [R(glue(seg))] }));
+            out.push(P({ jc: 'thaiDistribute', first: si ? 0 : tw(G.ind), before: !si && it.sp ? tw(it.sp * 25.4 / 72) : 0, widow: true, keepNext: close || si < arr.length - 1, keepLines: close || arr.length > 1, runs: [RT(glue(seg), it)] }));
           });
           break;
         }
@@ -1217,7 +1241,7 @@ var O5DOCX = (function () {
           var runs2 = [], left = it.num ? dN : dT;
           if (it.label) runs2.push(R(it.label, true), TAB);
           if (it.num) runs2.push(R(it.num), TAB);
-          runs2.push(R(glue(it.t)));
+          runs2.push(RT(glue(it.t), it));
           out.push(P({ jc: 'thaiDistribute', widow: true, tabs: [{ pos: dT }].concat(it.num ? [{ pos: dN }] : []), left: left,
             hang: it.label ? left - tw(G.dLab) : left - dT, runs: runs2 }));
           break;
