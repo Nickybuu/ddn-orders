@@ -30,7 +30,7 @@ details.api summary{cursor:pointer;color:var(--mute);font-size:16px}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 14px}
 .fgrid label{display:grid;gap:2px;font-size:16px;color:var(--mute)}.fgrid input,.fgrid select{width:100%;color:var(--ink)}
 .fgrid .wide{grid-column:1/-1}
-.info{font-size:17px;color:var(--mute)}
+.info{font-size:17px;color:var(--mute)}.info.bad{color:var(--bad);font-weight:600}
 #toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:18px;max-width:min(92vw,720px);display:none;z-index:50}
 #toast.bad{background:var(--bad)}
 #prev{background:#dfe4e2;padding:0 0 30px;overflow-x:hidden}
@@ -39,6 +39,7 @@ details.api summary{cursor:pointer;color:var(--mute);font-size:16px}
 .pbar{position:sticky;top:0;z-index:3;display:flex;gap:8px;align-items:center;padding:8px 14px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line)}
 .pbar button{min-width:40px;padding:4px 10px}#pno{min-width:5.5em;text-align:center;font-weight:700;white-space:nowrap}#zv{display:inline-block;min-width:2.9em}
 .fl{display:grid;gap:2px;font-size:16px;color:var(--mute)}
+.edited{border-color:var(--ok)!important;background:var(--oks)!important}
 textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--card);min-width:0;width:100%;resize:vertical;line-height:1.35}
 .side fieldset{border:1px solid var(--line);border-radius:10px;padding:10px 12px 12px;margin:0;display:grid;gap:10px;min-width:0}
 .side legend{font-weight:700;padding:0 6px;color:var(--ink)}
@@ -1283,7 +1284,7 @@ function view(h) { $('view').innerHTML = h; UI = false; }
 
 /* ---------- เข้าสู่ระบบ / โหลดข้อมูล ---------- */
 function showLogin(msg) {
-  $('bout').classList.add('hide'); chrome(false); $('pgs').innerHTML = ''; R = null; DATA = null; OV = {}; SS.set('ov', null);
+  $('bout').classList.add('hide'); chrome(false); $('pgs').innerHTML = ''; R = null; DATA = null;
   view('<section class="card login"><h2>เข้าสู่ระบบ</h2><div class="muted">จัดทำคำสั่งราชการ · สำหรับงานรับนักเรียน</div>' +
     '<form class="row" id="lf"><input type="text" name="username" value="admission-orders" autocomplete="username" class="hide"><input id="pw" type="password" autocomplete="current-password" placeholder="รหัสผ่าน" required><button class="pri" id="bpw" type="submit">เข้าสู่ระบบ</button></form>' +
     '<div class="err" id="lerr">' + esc(msg || '') + '</div>' +
@@ -1327,7 +1328,9 @@ var F = SS.get('form') || {};                       // ค่าที่กร�
 function saveForm() { F = { ord: $('f-ord').value, no: $('f-no').value, date: $('f-date').value, from: $('f-from').value, dg: $('f-dg').value }; SS.set('form', F); LS.set('dg', F.dg); }
 function cur() { var o = DATA && DATA.orders || [], id = $('f-ord') ? $('f-ord').value : ''; for (var i = 0; i < o.length; i++) if (String(o[i].id) === id) return o[i]; return null; }
 function opts() { return { no: $('f-no').value.trim(), date: $('f-date').value, from: $('f-from').value.trim(), digits: $('f-dg').value === 'ar' ? 'ar' : 'th', crest: CREST }; }
-var OV = SS.get('ov') || {};                        // ข้อความที่แก้เองต่อฉบับ (เฉพาะแท็บนี้ · ไม่เขียนกลับชีต · ล้างเมื่อออกจากระบบ)
+var OV = LS.get('ov') || {};                        // ฉบับร่าง: ข้อความที่แก้ต่อฉบับ (จำไว้ในเบราว์เซอร์เครื่องนี้ · อยู่ข้ามการออกจากระบบ/ปิดแท็บ) — ลงชีตเมื่อกด "บันทึกลงชีต" · ล้างด้วย "คืนค่าจากชีต"
+var OVB = LS.get('ovb') || {};                      // ค่าในชีตตอนเริ่มแก้แต่ละช่อง (ใช้ตรวจว่าชีตถูกแก้ระหว่างที่ร่างค้างอยู่ → กันเขียนทับของคนอื่น)
+function ovk(o) { return String(o.name || o.id); }   // คีย์ตามชื่อฉบับ (ไม่ใช้เลขแถว เผื่อแก้ลำดับในชีต)
 var TXT = [['subject', 't-subject'], ['intro', 't-intro'], ['close', 't-close'], ['signer', 't-signer'], ['signerPos', 't-signerpos'], ['dept', 't-dept']];
 var LINES = { subject: 1, intro: 1, close: 1 };
 function chrome(on) { ['prev', 'acts', 'tabs'].forEach(function (id) { $(id).classList.toggle('hide', !on); }); $('ws').classList.toggle('two', !!on); if (on) setZoom(); }
@@ -1338,23 +1341,77 @@ function paras(v) { return String(v).split(/\r?\n[ \t]*(?:\r?\n[ \t]*)+/).map(ln
 /** ฉบับที่ใช้สร้างหน้า = ข้อมูลจากชีต + ข้อความที่แก้เองในหน้านี้ */
 function effOrder() {
   var o = cur(); if (!o) return null;
-  var v = OV[o.id] || {}, e = {}, k;
+  var v = OV[ovk(o)] || {}, e = {}, k;
   for (k in o) e[k] = o[k];
   TXT.forEach(function (p) { if (v[p[0]] !== undefined) e[p[0]] = PARA[p[0]] ? paras(v[p[0]]) : LINES[p[0]] ? lns(v[p[0]]) : String(v[p[0]]).trim(); });
   return e;
 }
-function ovNote() { var o = cur(), n = o && OV[o.id] ? Object.keys(OV[o.id]).length : 0; $('ovn').textContent = n ? 'แก้ไขแล้ว ' + n + ' ส่วน' : ''; $('breset').disabled = !n; }
+function ovNote() {
+  var o = cur(), m = o && OV[ovk(o)] || {}, n = Object.keys(m).length;
+  TXT.forEach(function (p) { $(p[1]).classList.toggle('edited', m[p[0]] !== undefined); });
+  var st = o ? ovStale(o) : [];
+  $('ovn').textContent = st.length ? '⚠ ชีตถูกแก้ช่อง ' + st.map(function (k) { return TXTN[k]; }).join(', ') + ' ไปแล้ว — บันทึกทับไม่ได้ · คัดลอกข้อความที่คุณแก้ไว้ แล้วกด ↩ คืนค่าจากชีต' : n ? 'แก้ไขแล้ว ' + n + ' ส่วน · ยังเป็นฉบับร่างในเครื่องนี้ (ยังไม่ลงชีต)' : 'ตรงกับชีต';
+  $('ovn').classList.toggle('bad', !!st.length);
+  $('breset').disabled = !n; $('bsave').disabled = !n || !!st.length || SAVING;
+}
+var TXTN = { subject: 'เรื่อง', intro: 'ย่อหน้านำ', close: 'ข้อความปิด', signer: 'ผู้ลงนาม', signerPos: 'ตำแหน่งผู้ลงนาม', dept: 'ฝ่าย/หน่วยงาน' }, SAVING = false;
+/** ช่องร่างที่ชีตเปลี่ยนไปจากตอนเริ่มแก้ (มีคนแก้ในชีต/เครื่องอื่น) */
+function ovStale(o) {
+  var m = OV[ovk(o)] || {}, b = OVB[ovk(o)] || {};
+  return TXT.map(function (p) { return p[0]; }).filter(function (k) { return m[k] !== undefined && b[k] !== undefined && b[k] !== sheetVal(o, k); });
+}
+function ovDrop(o, ks) {
+  var key = ovk(o), m = OV[key], b = OVB[key];
+  ks.forEach(function (k) { if (m) delete m[k]; if (b) delete b[k]; });
+  if (m && !Object.keys(m).length) delete OV[key];
+  if (b && !Object.keys(b).length) delete OVB[key];
+  LS.set('ov', OV); LS.set('ovb', OVB);
+}
+/** หลังโหลดข้อมูลจากชีต: ร่างที่ตรงกับชีตแล้วทิ้ง · ร่างเก่าที่ไม่มีค่าอ้างอิง ถือว่าเริ่มแก้จากชีตปัจจุบัน */
+function ovReconcile() {
+  (DATA.orders || []).forEach(function (o) {
+    var m = OV[ovk(o)]; if (!m) return;
+    var same = Object.keys(m).filter(function (k) { return m[k] === sheetVal(o, k); });
+    if (same.length) ovDrop(o, same);
+    var b = OVB[ovk(o)] || (OVB[ovk(o)] = {});
+    Object.keys(OV[ovk(o)] || {}).forEach(function (k) { if (b[k] === undefined) b[k] = sheetVal(o, k); });
+  });
+  LS.set('ovb', OVB);
+}
 function fillText() {
   var o = cur();
-  TXT.forEach(function (p) { var e = $(p[1]); e.disabled = !o; e.value = o ? (OV[o.id] && OV[o.id][p[0]] !== undefined ? OV[o.id][p[0]] : sheetVal(o, p[0])) : ''; });
+  TXT.forEach(function (p) { var e = $(p[1]); e.disabled = !o; e.value = o ? (OV[ovk(o)] && OV[ovk(o)][p[0]] !== undefined ? OV[ovk(o)][p[0]] : sheetVal(o, p[0])) : ''; });
   ovNote();
 }
 function ovSet(k, v) {
   var o = cur(); if (!o) return;
-  var m = OV[o.id] || (OV[o.id] = {});
-  if (v === sheetVal(o, k)) delete m[k]; else m[k] = v;
-  if (!Object.keys(m).length) delete OV[o.id];
-  SS.set('ov', OV); ovNote();
+  if (v === sheetVal(o, k)) { ovDrop(o, [k]); ovNote(); return; }
+  var m = OV[ovk(o)] || (OV[ovk(o)] = {}), b = OVB[ovk(o)] || (OVB[ovk(o)] = {});
+  m[k] = v; if (b[k] === undefined) b[k] = sheetVal(o, k);
+  LS.set('ov', OV); LS.set('ovb', OVB); ovNote();
+}
+/** บันทึกฉบับร่างของฉบับที่เลือกลงแท็บ แม่แบบคำสั่ง (เซิร์ฟเวอร์เทียบกับค่าที่โหลดไว้ ถ้าชีตถูกแก้ไปแล้วจะไม่เขียนทับ) */
+function saveSheet() {
+  var o = cur(); if (!o || SAVING) return;
+  var m = OV[ovk(o)] || {}, ks = Object.keys(m); if (!ks.length || ovStale(o).length) return;
+  var f = {}, base = {}, sent = {};
+  ks.forEach(function (k) { sent[k] = m[k]; f[k] = PARA[k] ? paras(m[k]) : LINES[k] ? lns(m[k]) : String(m[k]).trim(); base[k] = o[k]; });
+  SAVING = true; $('bsave').disabled = true; $('bsave').textContent = 'กำลังบันทึก…';
+  var done = function () { SAVING = false; if ($('bsave')) { $('bsave').textContent = '💾 บันทึกลงชีต'; ovNote(); } };
+  send({ a: 'save', token: TOKEN, id: o.id, name: o.name, f: f, base: base }, 90000).then(function (r) {
+    if (r && r.ok) {
+      var key = ovk(o), still = {};
+      ks.forEach(function (k) { if ((OV[key] || {})[k] !== sent[k]) still[k] = 1; });   // ระหว่างบันทึกมีพิมพ์เพิ่ม → เก็บร่างส่วนนั้นไว้
+      OVB[key] = OVB[key] || {};
+      ovDrop(o, ks.filter(function (k) { return !still[k]; }));
+      DATA = r.data; LOADED = r.at || Date.now();
+      (DATA.orders || []).forEach(function (n) { if (ovk(n) === key) Object.keys(still).forEach(function (k) { (OVB[key] = OVB[key] || {})[k] = sheetVal(n, k); }); });
+      SAVING = false; $('bsave').textContent = '💾 บันทึกลงชีต'; showWork(); toast('บันทึกลงชีตแล้ว · ใช้ได้ทุกเครื่อง'); return;
+    }
+    done();
+    if (r && r.code === 'AUTH') { TOKEN = ''; SS.set('tok', null); showLogin('หมดเวลาเข้าสู่ระบบ — ข้อความที่แก้ยังเก็บไว้ในเครื่อง ใส่รหัสผ่านแล้วกดบันทึกอีกครั้ง'); return; }
+    toast((r && r.error) || 'บันทึกไม่ได้', true);
+  }, function (e) { done(); toast(e.message + ' (ข้อความที่แก้ยังเก็บไว้ในเครื่อง)', true); });
 }
 function showWork() {
   var os = DATA.orders || [];
@@ -1369,21 +1426,23 @@ function showWork() {
       '<label class="wide">ข้อความหลังคำว่า "ทั้งนี้"<input id="f-from" type="text" autocomplete="off" placeholder="เช่น ตั้งแต่วันที่ 28 ตุลาคม พ.ศ. 2569 เป็นต้นไป"></label>' +
       '<label>ตัวเลขในคำสั่ง<select id="f-dg"><option value="th">เลขไทย (๑ ๒ ๓)</option><option value="ar">เลขอารบิก (1 2 3)</option></select></label></div>' +
       '<div class="info">เว้นเลขที่/วันที่ว่าง = เว้นที่ไว้เขียนเอง · ระบบต่อ /ปี ให้เอง · "ทั้งนี้" ว่าง = ไม่มีบรรทัดนี้</div></fieldset>' +
-      '<fieldset><legend>ข้อความในคำสั่ง</legend><div class="info">แก้เฉพาะตอนพิมพ์ ไม่บันทึกลงชีต · ย่อหน้านำ/ข้อความปิด: <b>เว้นบรรทัดว่าง = ย่อหน้าใหม่</b> · กด Enter ธรรมดา = ขึ้นบรรทัดต่อในย่อหน้าเดิม (ชิดขอบซ้าย ไม่ย่อหน้า)</div>' +
+      '<fieldset><legend>ข้อความในคำสั่ง</legend><div class="info">แก้ข้อความแล้วดูผลทางขวาได้ทันที · ช่องที่แก้มีขอบสีเขียวและเก็บเป็น<b>ฉบับร่างในเครื่องนี้</b> · กด <b>💾 บันทึกลงชีต</b> เมื่อพอใจ เพื่อให้ทุกเครื่องได้ข้อความล่าสุด (เขียนลงแท็บ แม่แบบคำสั่ง) · ย่อหน้านำ/ข้อความปิด: <b>เว้นบรรทัดว่าง = ย่อหน้าใหม่</b> · กด Enter ธรรมดา = ขึ้นบรรทัดต่อในย่อหน้าเดิม (ชิดขอบซ้าย ไม่ย่อหน้า)</div>' +
       '<label class="fl">เรื่อง<textarea id="t-subject" rows="2"></textarea></label>' +
       '<label class="fl">ย่อหน้านำ (ก่อนรายชื่อ)<textarea id="t-intro" rows="7"></textarea></label>' +
       '<label class="fl">ข้อความปิด (หลังรายชื่อ)<textarea id="t-close" rows="4"></textarea></label>' +
       '<div class="fgrid"><label class="wide">ผู้ลงนาม<input id="t-signer" type="text" autocomplete="off"></label>' +
       '<label class="wide">ตำแหน่งผู้ลงนาม<input id="t-signerpos" type="text" autocomplete="off"></label>' +
       '<label class="wide">ฝ่าย/หน่วยงาน<input id="t-dept" type="text" autocomplete="off"></label></div>' +
-      '<div class="row"><button type="button" id="breset" title="ล้างข้อความที่แก้ของฉบับนี้ กลับไปใช้ตามชีต">↩ คืนค่าจากชีต</button><span class="info" id="ovn"></span></div></fieldset></section>');
+      '<div class="row"><button type="button" class="pri" id="bsave" title="บันทึกข้อความที่แก้ของฉบับนี้ลงชีต">💾 บันทึกลงชีต</button><button type="button" id="breset" title="ล้างข้อความที่แก้ของฉบับนี้ กลับไปใช้ตามชีต">↩ คืนค่าจากชีต</button></div><div class="info" id="ovn"></div></fieldset></section>');
     UI = true;
     $('f-no').value = F.no || ''; $('f-date').value = F.date || ''; $('f-from').value = F.from || ''; $('f-dg').value = dg === 'ar' ? 'ar' : 'th';
     ['f-ord', 'f-no', 'f-date', 'f-from', 'f-dg'].forEach(function (id) { $(id).addEventListener(id === 'f-ord' || id === 'f-dg' || id === 'f-date' ? 'change' : 'input', function () { saveForm(); if (id === 'f-ord') { fillText(); warns(); } draw(); }); });
     TXT.forEach(function (p) { $(p[1]).addEventListener('input', function () { ovSet(p[0], this.value); draw(); }); });
-    $('breset').onclick = function () { var o = cur(); if (o) { delete OV[o.id]; SS.set('ov', OV); } fillText(); draw(); toast('คืนค่าตามชีตแล้ว'); };
+    $('breset').onclick = function () { var o = cur(); if (o) ovDrop(o, Object.keys(OV[ovk(o)] || {})); fillText(); draw(); toast('คืนค่าตามชีตแล้ว'); };
+    $('bsave').onclick = saveSheet;
     $('bref').onclick = function () { load(true); };
   }
+  ovReconcile();
   var sel = $('f-ord'), keep = sel.value || F.ord || '';
   sel.innerHTML = os.length ? os.map(function (o) { return '<option value="' + esc(o.id) + '">' + esc(o.name) + '</option>'; }).join('') : '<option value="">(ยังไม่มีคำสั่งในแท็บ แม่แบบคำสั่ง)</option>';
   if (keep && os.some(function (o) { return String(o.id) === keep; })) sel.value = keep;
