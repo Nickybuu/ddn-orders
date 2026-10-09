@@ -73,7 +73,8 @@ textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radiu
 
 /* ระบบ 5 จัดทำคำสั่งราชการ — รูปแบบหน้าคำสั่ง A4 (ใช้คู่กับ order_render.js · ค่าระยะต้องตรงกับ G ใน order_render.js)
    ต้นฉบับ: ระบบรับนักเรียน/_สำหรับพัฒนา/ระบบ5_คำสั่ง/src/order.css
-   ขอบ ซ้าย 20 ขวา 12.5 บน 15 (หน้า 2+ เริ่มเนื้อความที่ 20.6 ใต้เลขหน้า) ล่าง 17.5 มม. · 16 pt บรรทัดเดียว (1.116) · ฟอนต์ DDNSarabun = TH SarabunPSK ที่ฝังในหน้า */
+   ขอบ ซ้าย 20 ขวา 12.5 บน 15 (หน้า 2+ เริ่มเนื้อความที่ 20.6 ใต้เลขหน้า) ล่าง 17.5 มม. · 16 pt บรรทัดเดียว (1.116) · ฟอนต์ DDNSarabun = TH SarabunPSK ที่ฝังในหน้า
+   ฉบับ ③: .o5-pre ข้อความนำใต้ชื่อคณะ (ย่อหน้า = G.preInd) · .o5-mg แถวกลุ่มคน · .o5-tr/.o5-td ตาราง (ระยะในช่อง = G.tdPad · เส้น = G.tdB) */
 .o5pg{position:relative;box-sizing:border-box;width:210mm;height:297mm;padding:15mm 12.5mm 17.5mm 20mm;margin:0 auto 8mm;background:#fff;color:#000;overflow:hidden;
   font-family:'DDNSarabun','TH SarabunPSK','TH Sarabun New',sans-serif;font-size:16pt;line-height:1.116;font-weight:400;font-feature-settings:"locl" 0,"tnum" 0,"lnum" 1}
 .o5pg.o5-p2{padding-top:20.598mm}
@@ -92,6 +93,13 @@ textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radiu
 .o5-m>.o5-mn{grid-column:2}
 .o5-m>.o5-ms{grid-column:5/7;grid-row:2}
 .o5-m.o5-wrap>.o5-mr{white-space:normal}
+.o5-m>.o5-mt{grid-column:3/6}
+.o5-mg>.o5-mr{grid-column:6}
+.o5-pre{text-indent:17.5mm}
+.o5-tr{display:grid;border-left:.5pt solid #000}
+.o5-td{min-width:0;padding:0 1.9mm;border-right:.5pt solid #000;border-bottom:.5pt solid #000;white-space:nowrap}
+.o5-th{border-top:.5pt solid #000;font-weight:700}
+.o5-th>.o5-td{text-align:center}
 .o5-nn{letter-spacing:0!important}
 .o5-d{position:relative;padding-left:22.5mm;text-indent:0;text-align:left}
 .o5-dl::before{content:attr(data-label);position:absolute;left:6.4mm;top:0;font-weight:700;text-indent:0}
@@ -722,7 +730,25 @@ var DDNDOCX = (function () {
       '<pic:blipFill><a:blip r:embed="rIdImg' + m.id + '"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' +
       '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + m.cx + '" cy="' + m.cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
   }
+  /** ตาราง (ตัวเลือกเพิ่ม คำสั่ง ระบบ 5 ฉบับ ③ · ไม่มี = เหมือนเดิมทุกไบต์): ใส่ใน model.paras เป็น { tbl: { widths:[twips], pad: ระยะในช่องซ้าย/ขวา (twips · 108), border: เส้น (1/8 pt · 4),
+      rows:[{ header: true = แถวหัวตาราง (พิมพ์ซ้ำทุกหน้า), cells:[[ย่อหน้า …], …] }] } } — เส้นเดี่ยวทุกช่อง · กว้างคงที่ · แถวไม่แยกข้ามหน้า
+      ลำดับใน tblPr ตามสคีมา: tblW → tblInd → tblBorders → tblLayout → tblCellMar · ทุกช่องต้องมีย่อหน้าอย่างน้อย 1 ย่อหน้า */
+  function tblXml(t) {
+    var sz = t.border || 4, pad = t.pad == null ? 108 : t.pad, tot = 0;
+    t.widths.forEach(function (w) { tot += w; });
+    var bd = ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(function (n) { return '<w:' + n + ' w:val="single" w:sz="' + sz + '" w:space="0" w:color="000000"/>'; }).join('');
+    var empty = { jc: 'left', left: 0, right: 0, first: 0, hang: 0, before: 0, after: 0, line: 240, runs: [] };
+    return '<w:tbl><w:tblPr><w:tblW w:w="' + tot + '" w:type="dxa"/><w:tblInd w:w="0" w:type="dxa"/><w:tblBorders>' + bd + '</w:tblBorders><w:tblLayout w:type="fixed"/>' +
+      '<w:tblCellMar><w:left w:w="' + pad + '" w:type="dxa"/><w:right w:w="' + pad + '" w:type="dxa"/></w:tblCellMar></w:tblPr>' +
+      '<w:tblGrid>' + t.widths.map(function (w) { return '<w:gridCol w:w="' + w + '"/>'; }).join('') + '</w:tblGrid>' +
+      t.rows.map(function (r) {
+        return '<w:tr><w:trPr><w:cantSplit/>' + (r.header ? '<w:tblHeader/>' : '') + '</w:trPr>' + r.cells.map(function (ps, i) {
+          return '<w:tc><w:tcPr><w:tcW w:w="' + t.widths[i] + '" w:type="dxa"/></w:tcPr>' + (ps && ps.length ? ps : [empty]).map(parXml).join('') + '</w:tc>';
+        }).join('') + '</w:tr>';
+      }).join('') + '</w:tbl>';
+  }
   function parXml(p) {
+    if (p.tbl) return tblXml(p.tbl);
     var ind = p.left || p.right || p.first || p.hang ? '<w:ind w:left="' + p.left + '" w:right="' + p.right + '"' + (p.hang ? ' w:hanging="' + p.hang + '"' : p.first ? ' w:firstLine="' + p.first + '"' : '') + '/>' : '';
     // ตัวเลือกเพิ่ม (คำสั่ง ระบบ 5): keepNext keepLines pageBreakBefore widow tabs:[{pos (twips), val left|center|right, leader}] — ไม่ใส่ = เหมือนเดิมทุกไบต์
     // ลำดับ element ใน pPr ต้องตามสคีมา: keepNext → keepLines → pageBreakBefore → widowControl → tabs → spacing → ind → jc (ผิดลำดับ Microsoft Word เปิดไม่ได้)
@@ -923,7 +949,9 @@ var DDNDOCX = (function () {
      บรรทัดใต้ตำแหน่ง (หน้าที่ในโรงเรียน) อยู่ใต้คอลัมน์ตำแหน่ง · ร้อยแก้วจัดกระจายแบบไทยด้วย DDNJUST
    - แบ่งหน้าเอง: บรรทัดรายชื่อไม่ขาดข้ามหน้า · หัวคณะไม่ค้างท้ายหน้า · ย่อหน้าไม่เหลือบรรทัดเดียวที่ท้าย/ต้นหน้า
      "สั่ง ณ วันที่" + ลงนาม + ฝ่ายเจ้าของเรื่อง อยู่หน้าเดียวกับ 2 บรรทัดสุดท้ายของข้อความ
-   - หน้า 2 เป็นต้นไปมีเลขหน้า "- ๒ -" กึ่งกลางด้านบน · ทุกหน้ายกเว้นหน้าสุดท้ายมีคำต่อท้ายหน้า (เช่น /๑.๒๑ นางสาวสมัย...) ตามที่โรงเรียนใช้ */
+   - หน้า 2 เป็นต้นไปมีเลขหน้า "- ๒ -" กึ่งกลางด้านบน · ทุกหน้ายกเว้นหน้าสุดท้ายมีคำต่อท้ายหน้า (เช่น /๑.๒๑ นางสาวสมัย...) ตามที่โรงเรียนใช้
+   - ฉบับ ③ (9 ต.ค. 69): ข้อความนำใต้ชื่อคณะ · แถวกลุ่มคน (ข้อความยาวข้ามช่องชื่อ-ตำแหน่ง) · คณะแบบตาราง วัน × ชั้น (ตามคำสั่ง 70/2569)
+     ตารางเส้นเดี่ยว · แถวไม่ขาดข้ามหน้า · ขึ้นหน้าใหม่กลางตาราง = พิมพ์หัวตารางซ้ำ */
 var O5ORDER = (function () {
   'use strict';
   /** ระยะทั้งหมดเป็นมิลลิเมตร (ตัวอักษรเป็นพอยต์) — order.css และ order_docx.js ใช้ค่าจากที่นี่ */
@@ -939,6 +967,8 @@ var O5ORDER = (function () {
     dateX: 45,                                                    // "สั่ง ณ วันที่"
     signX: 70, signW: 80, signGap: 3,                             // กล่องลงนาม (ข้อความกึ่งกลาง) · เว้น 3 บรรทัดก่อนชื่อ
     sep: 40,                                                      // เส้นคั่นใต้เรื่อง (จำนวนขีด)
+    preInd: 17.5,                                                 // ข้อความนำใต้ชื่อคณะ: ย่อหน้าบรรทัดแรก (แนวเดียวกับคอลัมน์ชื่อ · ตามคำสั่ง 70/2569) บรรทัดต่อชิดซ้าย
+    tdW: 40, tdPad: 1.9, tdB: 0.5,                                // ตาราง: คอลัมน์แรก (วันที่) กว้าง 40 มม. ที่เหลือแบ่งเท่ากัน · ระยะในช่องซ้าย/ขวา (= Word 0.19 ซม.) · เส้น 0.5 pt
  tight: 0.02,                                                   // บีบช่องไฟได้สูงสุด (เท่าของขนาดตัวอักษร ≈ 0.3 pt ที่ 16 pt) เพื่อดึงคำที่ตกท้ายย่อหน้าขึ้นไปอยู่บรรทัดก่อนหน้า · 0 = ไม่บีบ
     spClose: 9, spDate: 6                                         // เว้นก่อนย่อหน้าข้อความปิด / ก่อน "สั่ง ณ วันที่" (พอยต์ · ตามคำสั่งจริงปีก่อน: เว้นก่อนข้อความปิด ≈ 9 pt · spacing before ของ สั่ง ณ วันที่ = 6 pt) · การขึ้นบรรทัดใหม่ในย่อหน้า (Enter) ไม่เว้น
   };
@@ -954,8 +984,10 @@ var O5ORDER = (function () {
     return th ? s.replace(/[0-9]/g, function (d) { return THD.charAt(+d); }) : s.replace(/[๐-๙]/g, function (d) { return String(THD.indexOf(d)); });
   }
   function ymd(iso) { var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(iso || '')); if (!m) return null; var y = +m[1]; return { y: y < 2400 ? y + 543 : y, m: +m[2], d: +m[3] }; }
-  /** 'YYYY-MM-DD' (ค.ศ. หรือ พ.ศ.) → '28 ตุลาคม พ.ศ. 2569' · ไม่ใช่วันที่ → ข้อความเดิม */
-  function thaiDate(iso) { var x = ymd(iso); return x && x.m >= 1 && x.m <= 12 ? x.d + ' ' + MONTHS[x.m - 1] + ' พ.ศ. ' + x.y : String(iso || ''); }
+  /** 'YYYY-MM-DD' (ค.ศ. หรือ พ.ศ.) → '28 ตุลาคม พ.ศ. 2569' · ไม่ใช่วันที่ → ข้อความเดิม · bare = ไม่มีคำว่า พ.ศ. (วันที่ในตาราง: '8 กุมภาพันธ์ 2570') */
+  function thaiDate(iso, bare) { var x = ymd(iso); return x && x.m >= 1 && x.m <= 12 ? x.d + ' ' + MONTHS[x.m - 1] + (bare ? ' ' : ' พ.ศ. ') + x.y : String(iso || ''); }
+  /** ความกว้างคอลัมน์ตาราง (มม.) n คอลัมน์: คอลัมน์แรก G.tdW ที่เหลือแบ่งเท่ากันเต็มความกว้างเนื้อความ */
+  function tcols(n) { var w = [G.tdW]; for (var i = 1; i < n; i++) w.push((G.tw - G.tdW) / (n - 1)); return n > 1 ? w : [G.tw]; }
 
   /** โครงคำสั่งเป็นรายการชิ้น (ใช้ร่วมกันทั้งหน้าเว็บและ Word) — ข้อความแปลงเลขไทย/อารบิกแล้ว */
   function layout(data, order, opts) {
@@ -970,8 +1002,17 @@ var O5ORDER = (function () {
     order.committees.forEach(function (c, i) {
       var n = i + 1;
       items.push({ k: 'ch', num: D(n + '.'), t: D(c.title) });
+      (c.pre || []).forEach(function (s) { items.push({ k: 'pre', t: D(s) }); });     // ข้อความนำใต้ชื่อคณะ (เช่น ปฏิบัติหน้าที่ในวันที่ … ดังนี้)
+      if (c.table) {                                                                 // คณะแบบตาราง: tr.th = ตำแหน่งของแถวหัวตารางใน items (ใช้พิมพ์หัวซ้ำเมื่อขึ้นหน้าใหม่)
+        var th = items.length;
+        items.push({ k: 'th', cells: c.table.head.map(D) });
+        c.table.rows.forEach(function (r) {
+          items.push({ k: 'tr', th: th, cells: [D(thaiDate(r.date, true))].concat(r.cells.map(function (xs) { return D(xs.join('\n')); })) });
+        });
+      }
       c.members.forEach(function (m, j) {
-        items.push({ k: 'm', num: D(n + '.' + (j + 1)), first: D(m.prefix + m.first), last: D(m.last), pos: D(m.pos), role: D(m.role), sub: D(m.sub || '') });
+        if (m.group) items.push({ k: 'm', group: true, num: D(n + '.' + (j + 1)), text: D(m.first), first: '', last: '', pos: '', role: D(m.role), sub: '' });
+        else items.push({ k: 'm', num: D(n + '.' + (j + 1)), first: D(m.prefix + m.first), last: D(m.last), pos: D(m.pos), role: D(m.role), sub: D(m.sub || '') });
       });
       c.duties.forEach(function (d, j) {
         items.push({ k: 'd', label: j ? '' : 'มีหน้าที่', num: c.duties.length > 1 ? D((j + 1) + '.') : '', t: D(d) });
@@ -992,10 +1033,11 @@ var O5ORDER = (function () {
 
   /** ตำแหน่งคอลัมน์รายชื่อ (มม. จากซ้ายของเนื้อความ) · mw(ข้อความ) = ความกว้าง (มม.) ที่ 16 pt
       เริ่มจากค่าตามคำสั่ง 396 แล้วขยับคอลัมน์ถัดไปถ้าข้อความยาวกว่าช่อง · ถ้ายังเกินขอบขวา จัดชิดกันด้วยช่องว่างขั้นต่ำ
-      · ถ้ายังไม่พอ บทบาทที่ยาวตัดเป็น 2 บรรทัดในคอลัมน์บทบาท (wrap) */
+      · ถ้ายังไม่พอ บทบาทที่ยาวตัดเป็น 2 บรรทัดในคอลัมน์บทบาท (wrap)
+      · แถวกลุ่มคน (group) ไม่นับช่องชื่อ/สกุล/ตำแหน่ง (ข้อความยาวข้ามสามช่อง) */
   function columns(items, mw) {
     var mx = [0, 0, 0, 0, 0], keys = ['num', 'first', 'last', 'pos', 'role'];
-    items.forEach(function (it) { if (it.k === 'm') keys.forEach(function (k, i) { mx[i] = Math.max(mx[i], mw(it[k] || '')); }); });
+    items.forEach(function (it) { if (it.k === 'm') keys.forEach(function (k, i) { if (!(it.group && i >= 1 && i <= 3)) mx[i] = Math.max(mx[i], mw(it[k] || '')); }); });
     var place = function (base, g) { var x = [base[0]]; for (var i = 1; i < 5; i++) x[i] = Math.max(base[i], x[i - 1] + mx[i - 1] + g); return x; };
     var x = place(G.cols, G.gap);
     if (x[4] + mx[4] > G.tw) x = place([G.cols[0], 0, 0, 0, 0], G.gap);
@@ -1014,9 +1056,14 @@ var O5ORDER = (function () {
       case 'sep': return '<div class="o5-c o5-sep">' + it.t + '</div>';
       case 'p': return '<p class="o5-p tj"' + TIGHT + (it.t.indexOf('\n') >= 0 ? ' data-brj="1"' : '') + (it.sp ? ' style="margin-top:' + mm(it.sp * 25.4 / 72) + '"' : '') + '>' + esc(it.t).replace(/\n/g, '<br>') + '</p>';   // \n = ขึ้นบรรทัดใหม่ในย่อหน้าเดิม (บรรทัดต่อไปชิดขอบซ้าย ไม่ย่อหน้า)
       case 'ch': return '<div class="o5-ch o5-b"><span class="o5-chn">' + esc(it.num) + '</span>' + esc(it.t) + '</div>';
+      case 'pre': return '<p class="o5-p o5-pre tj"' + TIGHT + (it.t.indexOf('\n') >= 0 ? ' data-brj="1"' : '') + '>' + esc(it.t).replace(/\n/g, '<br>') + '</p>';
+      case 'th': case 'tr':
+        return '<div class="o5-tr' + (it.k === 'th' ? ' o5-th' : '') + '" style="grid-template-columns:' + tcols(it.cells.length).map(mm).join(' ') + '">' +
+          it.cells.map(function (c) { return '<div class="o5-td">' + esc(c).replace(/\n/g, '<br>') + '</div>'; }).join('') + '</div>';
       case 'm': {
         var x = cols.x, w = [x[1] - x[0], x[2] - x[1], x[3] - x[2], x[4] - x[3], G.tw - x[4]];
         var gt = mm(x[0]) + ' ' + w.map(mm).join(' ');
+        if (it.group) return '<div class="o5-m o5-mg" style="grid-template-columns:' + gt + '"><span class="o5-mn">' + esc(it.num) + '</span><span class="o5-mt">' + esc(it.text) + '</span><span class="o5-mr">' + esc(it.role) + '</span></div>';
         return '<div class="o5-m' + (cols.wrap ? ' o5-wrap' : '') + '" style="grid-template-columns:' + gt + '">' +
           '<span class="o5-mn">' + esc(it.num) + '</span><span>' + esc(it.first) + '</span><span>' + esc(it.last) + '</span><span>' + esc(it.pos) + '</span><span class="o5-mr">' + esc(it.role) + '</span>' +
           (it.sub ? '<span class="o5-ms">' + esc(it.sub) + '</span>' : '') + '</div>';
@@ -1055,7 +1102,8 @@ var O5ORDER = (function () {
   /** คำต่อท้ายหน้า (ข้อความต้นหน้าถัดไป) เช่น /๑.๒๑ นางสาวสมัย... · /๒. คณะกรรมการ... · /มีหน้าที่... */
   function contOf(a) {
     var it = a.it;
-    if (it.k === 'm') return '/' + it.num + ' ' + it.first + '...';
+    if (it.k === 'm') return '/' + it.num + ' ' + (it.group ? firstWord(it.text) : it.first) + '...';
+    if (it.k === 'tr') return '/' + String(it.cells[0]).split(/\s+/).slice(0, 2).join(' ') + '...';      // แถวตาราง: วันที่ (เช่น /๑๒ กุมภาพันธ์...)
     if (it.k === 'ch') return '/' + it.num + ' ' + firstWord(it.t) + '...';
     if (it.k === 'd' && a.line <= 0 && it.label) return '/' + it.label + '...';
     var t = a.text != null ? a.text : (it.k === 'd' && it.num ? it.num + ' ' : '') + (it.t || it.name || '');
@@ -1091,6 +1139,12 @@ var O5ORDER = (function () {
     var mw = measurer(doc), cols = columns(items, mw);
     flow.innerHTML = items.map(function (it) { return itemHtml(it, cols, opts); }).join('');
     var els = [].slice.call(flow.children);
+    els.forEach(function (e, i) {   // หัวคณะเลขสองหลัก (๑๐. ๑๑.) กว้างกว่าช่องเลข → ชื่อคณะเริ่มหลังเลข + เว้นวรรค 1 ช่อง (ไฟล์ Word ใช้ค่าเดียวกัน it.chX)
+      if (items[i].k !== 'ch') return;
+      var w = e.firstChild.getBoundingClientRect().width / MM / Z + mw(' ');
+      items[i].chX = Math.max(G.cols[0], w);
+      if (w > G.cols[0]) e.style.paddingLeft = mm(w);
+    });
     // 2) จัดกระจายแบบไทย (ย่อหน้าที่จัดได้ แยกเป็นบรรทัด span.tj-l แบ่งข้ามหน้าทีละบรรทัดได้)
     var J = typeof DDNJUST !== 'undefined' && DDNJUST.ok ? DDNJUST : null;
     els.forEach(function (e, ei) {
@@ -1119,13 +1173,16 @@ var O5ORDER = (function () {
     });
     atoms.forEach(function (a, i) {
       var k = a.it.k, nx = atoms[i + 1];
-      if (k === 'crest' || k === 'title' || k === 'no' || k === 'subj' || k === 'sep' || k === 'ch' || k === 'from' || k === 'date' || k === 'sign') a.glue = true;
+      if (k === 'crest' || k === 'title' || k === 'no' || k === 'subj' || k === 'sep' || k === 'ch' || k === 'from' || k === 'date' || k === 'sign' || k === 'th' || k === 'pre') a.glue = true;  // ข้อความนำ/หัวตารางติดกับแถวถัดไป
       if (k === 'p' && a.it.close && (a.line === -1 || a.line === a.n - 1)) a.glue = true;  // ข้อความปิดบรรทัดท้ายติดกับวันที่สั่ง/ลงนาม
       if (k === 'p' && a.it.close && a.line === a.n - 2) a.glue = true;
       if (!nx) a.glue = false;
     });
     // 4) จัดลงหน้า: กลุ่มที่ติดกันต้องอยู่หน้าเดียว ถ้ากลุ่มสูงเกินหน้า ตัดที่บรรทัดสุดท้ายที่ใส่ได้
     var cap = function (p) { return G.H - (p ? G.mt2 : G.mt) - G.mb - G.line - 0.5; }; // สงวน 1 บรรทัดล่างไว้ให้คำต่อท้ายหน้า (+ เผื่อปัดเศษ 0.5 มม.)
+    var thH = {};                                                                   // ส่วนสูงหัวตาราง (มม.) → หน้าที่เริ่มด้วยแถวตารางต้องเผื่อที่ให้หัวตารางที่พิมพ์ซ้ำ
+    items.forEach(function (it, i) { if (it.k === 'th') thH[i] = els[i].getBoundingClientRect().height / MM / Z; });
+    var rep = function (a) { return a && a.it.k === 'tr' ? thH[a.it.th] || 0 : 0; };
     var pages = [[]], used = 0, i0 = 0;
     while (i0 < atoms.length) {
       var j = i0, h = atoms[i0].h;
@@ -1134,13 +1191,13 @@ var O5ORDER = (function () {
       if (h <= room + 0.01) {
         for (var k = i0; k <= j; k++) pages[pages.length - 1].push(atoms[k]);
         used += h; i0 = j + 1;
-      } else if (pages[pages.length - 1].length && h <= cap(1) + 0.01) {
-        pages.push([]); used = 0;
+      } else if (pages[pages.length - 1].length && h + rep(atoms[i0]) <= cap(1) + 0.01) {
+        pages.push([]); used = rep(atoms[i0]);
       } else { // กลุ่มสูงเกินหน้า (หรือหน้าว่างแล้วยังไม่พอ): ใส่เท่าที่ได้
         var put = 0;
         while (i0 <= j && atoms[i0].h <= room + 0.01) { pages[pages.length - 1].push(atoms[i0]); room -= atoms[i0].h; used += atoms[i0].h; i0++; put++; }
         if (!put && !pages[pages.length - 1].length) { pages[pages.length - 1].push(atoms[i0]); i0++; }
-        pages.push([]); used = 0;
+        pages.push([]); used = i0 < atoms.length ? rep(atoms[i0]) : 0;
       }
     }
     if (!pages[pages.length - 1].length) pages.pop();
@@ -1152,6 +1209,7 @@ var O5ORDER = (function () {
       var body = doc.createElement('div'); body.className = 'o5-body'; sec.appendChild(body);
       var cur = null, curEl = null;
       pg.forEach(function (a) {
+        if (!body.firstChild && a.it.k === 'tr') body.appendChild(els[a.it.th].cloneNode(true));   // ขึ้นหน้าใหม่กลางตาราง: หัวตารางซ้ำ
         var top0 = !body.firstChild;   // ชิ้นแรกของหน้า: ไม่เว้นระยะก่อน
         if (a.line < 0) { body.appendChild(a.el); if (a.sp && top0) a.el.style.marginTop = '0'; cur = null; return; }
         if (curEl !== a.el || !cur) {
@@ -1160,6 +1218,7 @@ var O5ORDER = (function () {
           body.appendChild(cur); curEl = a.el;
         }
         cur.appendChild(a.ln);
+        if (a.line < a.n - 1) cur.setAttribute('data-more', '1'); else cur.removeAttribute('data-more');   // ย่อหน้ายังต่อหน้าถัดไป (บรรทัดท้ายหน้านี้ต้องเต็มบรรทัด)
       });
       return sec;
     });
@@ -1171,7 +1230,7 @@ var O5ORDER = (function () {
     return { pages: out, items: items, cols: cols, atoms: atoms, plan: pages, mw: mw };
   }
 
-  var api = { G: G, digits: digits, thaiDate: thaiDate, layout: layout, columns: columns, render: render, measurer: measurer, contOf: contOf, MM: MM };
+  var api = { G: G, digits: digits, thaiDate: thaiDate, tcols: tcols, layout: layout, columns: columns, render: render, measurer: measurer, contOf: contOf, MM: MM };
   if (typeof window !== 'undefined') window.O5ORDER = api;
   return api;
 })();
@@ -1183,6 +1242,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = O5ORDER;</
      · วันที่สั่ง ลงนาม ฝ่ายเจ้าของเรื่อง อยู่ด้วยกัน — แก้ข้อความแล้วหน้าเลื่อนเองได้ จึง "ไม่ใส่คำต่อท้ายหน้า" ในไฟล์ Word (พิมพ์จากหน้าเว็บมีให้)
    - เลขหน้า "- ๒ -" ที่หัวกระดาษตั้งแต่หน้า 2 (ฟิลด์ PAGE ของ Word นับเอง · เป็นเลขไทยเพราะฟอนต์ TH SarabunIT๙) · ร้อยแก้วจัด "กระจายแบบไทย" ให้ Word ตัดบรรทัดเอง
    - วลีที่ไม่ควรฉีก (พ.ศ. ๒๕๔๗ · ปีการศึกษา ๒๕๗๐ · วันที่ ๒๘ ตุลาคม ... · คำสำคัญของ DDNDOCX) ใช้ DDNDOCX.glue ชุดเดียวกับหน้าประกาศ
+   ฉบับ ③: ข้อความนำใต้ชื่อคณะ (ย่อหน้า G.preInd) · แถวกลุ่มคน (tab ข้ามช่องชื่อ-ตำแหน่ง) · ตารางวัน × ชั้น (<w:tbl> ของ DDNDOCX: เส้นเดี่ยว แถวไม่แยกหน้า หัวตารางซ้ำทุกหน้า)
    ฟอนต์: เลขไทย (ค่าเริ่มต้น) = TH SarabunIT๙ เหมือนคำสั่งจริงของโรงเรียน (ตัวเลขที่พิมพ์เพิ่มใน Word และเลขหน้าเป็นเลขไทยเอง)
           · เลขอารบิก = TH SarabunPSK (IT๙ แสดงเลขอารบิกเป็นเลขไทย จึงใช้กับโหมดอารบิกไม่ได้) — เปลี่ยนได้ที่ FONT */
 var O5DOCX = (function () {
@@ -1227,7 +1287,7 @@ var O5DOCX = (function () {
     var G = O5ORDER.G, x = cols.x, out = [], title = '';
     var numW = 0;
     items.forEach(function (it) { if (it.k === 'd' && it.num) numW = Math.max(numW, mw(it.num + ' ')); });
-    var dT = tw(G.dInd), dN = tw(G.dInd + numW);
+    var dT = tw(G.dInd), dN = tw(G.dInd + numW), tb = null;
     items.forEach(function (it, i) {
       var nx = items[i + 1] || {};
       switch (it.k) {
@@ -1242,8 +1302,25 @@ var O5DOCX = (function () {
           });
           break;
         }
-        case 'ch': out.push(P({ keepNext: true, keepLines: true, left: tw(x[0]), hang: tw(x[0]), tabs: [{ pos: tw(x[0]) }], runs: [R(it.num, true), TAB, R(glue(it.t), true)] })); break;
+        case 'pre':                                           // ข้อความนำใต้ชื่อคณะ: ติดกับรายชื่อ/ตารางที่ตามมา
+          String(it.t).split('\n').forEach(function (seg, si) {
+            out.push(P({ jc: 'thaiDistribute', first: si ? 0 : tw(G.preInd), widow: true, keepNext: true, keepLines: true, runs: [RT(glue(seg), it)] }));
+          });
+          break;
+        case 'th': case 'tr': {                               // ตาราง: แถวหัว (bold กึ่งกลาง · ติดกับแถวแรก) ตามด้วยแถววัน · บรรทัดในช่องคั่นด้วย \n = ย่อหน้าละชื่อ
+          if (it.k === 'th' || !tb) { tb = { widths: O5ORDER.tcols(it.cells.length).map(tw), pad: tw(G.tdPad), border: Math.round(G.tdB * 8), rows: [] }; out.push({ tbl: tb }); }
+          var hd = it.k === 'th';
+          tb.rows.push({ header: hd, cells: it.cells.map(function (c) {
+            return String(c).split('\n').filter(function (x) { return x !== ''; }).map(function (x) { return P({ jc: hd ? 'center' : 'left', keepNext: hd, runs: [R(glue(x), hd)] }); });
+          }) });
+          break;
+        }
+        case 'ch': { var cx = tw(it.chX || x[0]); out.push(P({ keepNext: true, keepLines: true, left: cx, hang: cx, tabs: [{ pos: cx }], runs: [R(it.num, true), TAB, R(glue(it.t), true)] })); break; }   // chX: หัวคณะเลขสองหลัก
         case 'm': {
+          if (it.group) {                                     // แถวกลุ่มคน: ข้อ │ ข้อความยาวข้ามช่องชื่อ-สกุล-ตำแหน่ง │ บทบาท
+            out.push(P({ keepLines: true, tabs: [x[0], x[1], x[4]].map(function (v) { return { pos: tw(v) }; }), runs: [TAB, R(it.num), TAB, R(it.text), TAB, R(it.role)] }));
+            break;
+          }
           var tabs = x.map(function (v) { return { pos: tw(v) }; });
           var runs = [TAB, R(it.num), TAB, R(it.first), TAB, R(it.last), TAB, R(it.pos), TAB, R(it.role)];
           // บทบาทยาวเกินขอบ (กรณีพิเศษ): บรรทัดที่ตัดต่อเยื้องที่คอลัมน์บทบาท
@@ -1522,7 +1599,7 @@ function drawNow() {
   try { R = O5ORDER.render(host, DATA, o, opts()); }
   catch (e) { host.style.minHeight = ''; host.innerHTML = '<div class="empty">สร้างคำสั่งไม่ได้</div>'; $('info').textContent = ''; toast('สร้างคำสั่งไม่ได้: ' + e.message, true); $('bprint').disabled = $('bword').disabled = true; return; }
   pv.scrollTop = sy; if (wy) window.scrollTo(0, wy); host.style.minHeight = ''; pv.scrollTop = sy; if (wy) window.scrollTo(0, wy);
-  var n = 0; o.committees.forEach(function (c) { n += c.members.length; });
+  var n = 0; o.committees.forEach(function (c) { n += c.members.length; if (c.table) c.table.rows.forEach(function (r) { r.cells.forEach(function (x) { n += x.length; }); }); });
   $('info').textContent = R.pages.length + ' หน้า · ' + o.committees.length + ' คณะ · ' + n + ' รายชื่อ';
   $('bprint').disabled = $('bword').disabled = false; pageNow();
 }
