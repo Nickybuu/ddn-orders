@@ -363,7 +363,7 @@ var DDNJUST = (function () {
       for (; ca && ca !== el; ca = ca.parentNode) { // บรรทัดที่อยู่ในชิ้นเดียวทั้งบรรทัด (เช่น ตัวหนายาว 3 บรรทัด บรรทัดกลาง): cloneContents ไม่ติดตัวครอบมา → ครอบกลับ
         var wr = ca.cloneNode(false); wr.appendChild(fr); fr = D.createDocumentFragment(); fr.appendChild(wr);
       }
-      lines.push({ frag: fr, last: L === cut.length - 1 || U[j].f, av: L === 0 ? res.cw - res.ti : res.cw });
+      lines.push({ frag: fr, last: L === cut.length - 1 || (U[j].f && !el.hasAttribute('data-brj')), av: L === 0 ? res.cw - res.ti : res.cw });
     }
     while (el.firstChild) el.removeChild(el.firstChild);
     lines.forEach(function (ln, L) {
@@ -916,7 +916,8 @@ var O5ORDER = (function () {
     dInd: 22.5,                                                   // ข้อความหน้าที่เริ่มที่ระยะนี้
     dateX: 45,                                                    // "สั่ง ณ วันที่"
     signX: 70, signW: 80, signGap: 3,                             // กล่องลงนาม (ข้อความกึ่งกลาง) · เว้น 3 บรรทัดก่อนชื่อ
-    sep: 40                                                       // เส้นคั่นใต้เรื่อง (จำนวนขีด)
+    sep: 40,                                                      // เส้นคั่นใต้เรื่อง (จำนวนขีด)
+    spClose: 9, spDate: 6                                         // เว้นก่อนย่อหน้าข้อความปิด / ก่อน "สั่ง ณ วันที่" (พอยต์ · ตามคำสั่งจริงปีก่อน: เว้นก่อนข้อความปิด ≈ 9 pt · spacing before ของ สั่ง ณ วันที่ = 6 pt) · การขึ้นบรรทัดใหม่ในย่อหน้า (Enter) ไม่เว้น
   };
   G.line = G.fs * G.lh * 25.4 / 72;                               // 1 บรรทัด ≈ 6.3 มม.
   G.mt2 = G.hdr + 2 * G.line;                                     // หน้า 2 ขึ้นไป: เลขหน้า 1 บรรทัด + เว้น 1 บรรทัด
@@ -958,6 +959,11 @@ var O5ORDER = (function () {
     items.push({ k: 'date', t: D('สั่ง ณ วันที่ ' + (dt ? thaiDate(opts.date) : new Array(13).join(NB) + 'พ.ศ. ' + yr)) });
     items.push({ k: 'sign', name: D('(' + (order.signer || data.signer || '') + ')'), pos: D(order.signerPos || data.signerPos || '') });
     if (order.dept || data.dept) items.push({ k: 'dept', t: D(order.dept || data.dept) });
+    var firstClose = true;
+    items.forEach(function (it) {   // ระยะเว้นก่อนชิ้น (พอยต์) — เฉพาะย่อหน้าข้อความปิดย่อหน้าแรก และ "สั่ง ณ วันที่"
+      if (it.k === 'p' && it.close && firstClose) { it.sp = G.spClose; firstClose = false; }
+      if (it.k === 'date') it.sp = G.spDate;
+    });
     return items;
   }
 
@@ -982,7 +988,7 @@ var O5ORDER = (function () {
       case 'crest': return '<div class="o5-crest">' + (opts.crest ? '<img alt="" src="' + esc(opts.crest) + '">' : '') + '</div>';
       case 'title': case 'no': case 'subj': return '<div class="o5-c o5-b">' + esc(it.t) + '</div>';
       case 'sep': return '<div class="o5-c o5-sep">' + it.t + '</div>';
-      case 'p': return '<p class="o5-p tj">' + esc(it.t) + '</p>';
+      case 'p': return '<p class="o5-p tj"' + (it.t.indexOf('\n') >= 0 ? ' data-brj="1"' : '') + (it.sp ? ' style="margin-top:' + mm(it.sp * 25.4 / 72) + '"' : '') + '>' + esc(it.t).replace(/\n/g, '<br>') + '</p>';   // \n = ขึ้นบรรทัดใหม่ในย่อหน้าเดิม (บรรทัดต่อไปชิดขอบซ้าย ไม่ย่อหน้า)
       case 'ch': return '<div class="o5-ch o5-b"><span class="o5-chn">' + esc(it.num) + '</span>' + esc(it.t) + '</div>';
       case 'm': {
         var x = cols.x, w = [x[1] - x[0], x[2] - x[1], x[3] - x[2], x[4] - x[3], G.tw - x[4]];
@@ -994,7 +1000,7 @@ var O5ORDER = (function () {
       case 'd': return '<p class="o5-d tj' + (it.label ? ' o5-dl' : '') + '"' + (it.label ? ' data-label="' + esc(it.label) + '"' : '') + (it.num ? ' data-num="' + esc(it.num) + '"' : '') + '>' +
         (it.num ? esc(it.num) + ' ' : '') + esc(it.t) + '</p>';
       case 'from': return '<p class="o5-p tj">' + esc(it.t) + '</p>';
-      case 'date': return '<div class="o5-date">' + esc(it.t) + '</div>';
+      case 'date': return '<div class="o5-date"' + (it.sp ? ' style="margin-top:' + mm(it.sp * 25.4 / 72) + '"' : '') + '>' + esc(it.t) + '</div>';
       case 'sign': return '<div class="o5-sign"><div>' + esc(it.name) + '</div><div>' + esc(it.pos) + '</div></div>';
       case 'dept': return '<div class="o5-dept">' + esc(it.t) + '</div>';
     }
@@ -1065,12 +1071,12 @@ var O5ORDER = (function () {
       if (lines && lines.length > 1) {
         var n = lines.length;
         lines.forEach(function (ln, j) {
-          atoms.push({ it: it, el: e, line: j, n: n, ln: ln, h: ln.getBoundingClientRect().height / MM / Z, text: ln.textContent,
+          atoms.push({ it: it, el: e, line: j, n: n, ln: ln, sp: j ? 0 : it.sp || 0, h: ln.getBoundingClientRect().height / MM / Z + (j || !it.sp ? 0 : it.sp * 25.4 / 72), text: ln.textContent,
             glue: n <= 3 ? j < n - 1 : (j === 0 || j >= n - 2 && j < n - 1) });
         });
       } else {
         var r = e.getBoundingClientRect();
-        atoms.push({ it: it, el: e, line: -1, h: r.height / MM / Z, glue: false });
+        atoms.push({ it: it, el: e, line: -1, sp: it.sp || 0, h: r.height / MM / Z + (it.sp ? it.sp * 25.4 / 72 : 0), glue: false });
       }
     });
     atoms.forEach(function (a, i) {
@@ -1108,10 +1114,11 @@ var O5ORDER = (function () {
       var body = doc.createElement('div'); body.className = 'o5-body'; sec.appendChild(body);
       var cur = null, curEl = null;
       pg.forEach(function (a) {
-        if (a.line < 0) { body.appendChild(a.el); cur = null; return; }
+        var top0 = !body.firstChild;   // ชิ้นแรกของหน้า: ไม่เว้นระยะก่อน
+        if (a.line < 0) { body.appendChild(a.el); if (a.sp && top0) a.el.style.marginTop = '0'; cur = null; return; }
         if (curEl !== a.el || !cur) {
           cur = a.el.cloneNode(false);
-          if (a.line > 0) { cur.classList.remove('o5-dl'); cur.removeAttribute('data-label'); }
+          if (a.line > 0) { cur.classList.remove('o5-dl'); cur.removeAttribute('data-label'); cur.style.marginTop = ''; } else if (a.sp && top0) cur.style.marginTop = '0';
           body.appendChild(cur); curEl = a.el;
         }
         cur.appendChild(a.ln);
@@ -1190,7 +1197,9 @@ var O5DOCX = (function () {
         case 'sep': out.push(P({ jc: 'center', keepNext: true, runs: [R(it.t)] })); break;
         case 'p': case 'from': {
           var close = it.close && (nx.k === 'date' || nx.k === 'from') || it.k === 'from';
-          out.push(P({ jc: 'thaiDistribute', first: tw(G.ind), widow: true, keepNext: close, keepLines: close, runs: [R(glue(it.t))] }));
+          String(it.t).split('\n').forEach(function (seg, si, arr) {   // บรรทัดที่ขึ้นใหม่ในย่อหน้า: ชิดขอบซ้าย ไม่เว้นหัวย่อหน้า
+            out.push(P({ jc: 'thaiDistribute', first: si ? 0 : tw(G.ind), before: !si && it.sp ? tw(it.sp * 25.4 / 72) : 0, widow: true, keepNext: close || si < arr.length - 1, keepLines: close || arr.length > 1, runs: [R(glue(seg))] }));
+          });
           break;
         }
         case 'ch': out.push(P({ keepNext: true, keepLines: true, left: tw(x[0]), hang: tw(x[0]), tabs: [{ pos: tw(x[0]) }], runs: [R(it.num, true), TAB, R(glue(it.t), true)] })); break;
@@ -1211,7 +1220,7 @@ var O5DOCX = (function () {
             hang: it.label ? left - tw(G.dLab) : left - dT, runs: runs2 }));
           break;
         }
-        case 'date': out.push(P({ keepNext: true, left: tw(G.dateX), runs: [R(glue(it.t))] })); break;
+        case 'date': out.push(P({ keepNext: true, before: it.sp ? tw(it.sp * 25.4 / 72) : 0, left: tw(G.dateX), runs: [R(glue(it.t))] })); break;
         case 'sign': {
           var sl = tw(G.signX), sr = tw(G.tw - G.signX - G.signW);
           for (var k = 0; k < G.signGap; k++) out.push(P({ keepNext: true, runs: [] }));
@@ -1321,14 +1330,16 @@ var OV = SS.get('ov') || {};                        // ข้อความท�
 var TXT = [['subject', 't-subject'], ['intro', 't-intro'], ['close', 't-close'], ['signer', 't-signer'], ['signerPos', 't-signerpos'], ['dept', 't-dept']];
 var LINES = { subject: 1, intro: 1, close: 1 };
 function chrome(on) { ['prev', 'acts', 'tabs'].forEach(function (id) { $(id).classList.toggle('hide', !on); }); $('ws').classList.toggle('two', !!on); if (on) setZoom(); }
-function sheetVal(o, k) { var v = o[k]; return Array.isArray(v) ? v.join('\n') : String(v == null ? '' : v); }
+var PARA = { intro: 1, close: 1 };                    // ย่อหน้านำ/ข้อความปิด: เว้นบรรทัดว่าง = ย่อหน้าใหม่ · ขึ้นบรรทัดธรรมดา = ขึ้นบรรทัดต่อในย่อหน้าเดิม
+function sheetVal(o, k) { var v = o[k]; return Array.isArray(v) ? v.join(PARA[k] ? '\n\n' : '\n') : String(v == null ? '' : v); }
 function lns(v) { return String(v).split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean); }
+function paras(v) { return String(v).split(/\r?\n[ \t]*(?:\r?\n[ \t]*)+/).map(lns).filter(function (l) { return l.length; }).map(function (l) { return l.join('\n'); }); }
 /** ฉบับที่ใช้สร้างหน้า = ข้อมูลจากชีต + ข้อความที่แก้เองในหน้านี้ */
 function effOrder() {
   var o = cur(); if (!o) return null;
   var v = OV[o.id] || {}, e = {}, k;
   for (k in o) e[k] = o[k];
-  TXT.forEach(function (p) { if (v[p[0]] !== undefined) e[p[0]] = LINES[p[0]] ? lns(v[p[0]]) : String(v[p[0]]).trim(); });
+  TXT.forEach(function (p) { if (v[p[0]] !== undefined) e[p[0]] = PARA[p[0]] ? paras(v[p[0]]) : LINES[p[0]] ? lns(v[p[0]]) : String(v[p[0]]).trim(); });
   return e;
 }
 function ovNote() { var o = cur(), n = o && OV[o.id] ? Object.keys(OV[o.id]).length : 0; $('ovn').textContent = n ? 'แก้ไขแล้ว ' + n + ' ส่วน' : ''; $('breset').disabled = !n; }
@@ -1357,7 +1368,7 @@ function showWork() {
       '<label class="wide">ข้อความหลังคำว่า "ทั้งนี้"<input id="f-from" type="text" autocomplete="off" placeholder="เช่น ตั้งแต่วันที่ 28 ตุลาคม พ.ศ. 2569 เป็นต้นไป"></label>' +
       '<label>ตัวเลขในคำสั่ง<select id="f-dg"><option value="th">เลขไทย (๑ ๒ ๓)</option><option value="ar">เลขอารบิก (1 2 3)</option></select></label></div>' +
       '<div class="info">เว้นเลขที่/วันที่ว่าง = เว้นที่ไว้เขียนเอง · ระบบต่อ /ปี ให้เอง · "ทั้งนี้" ว่าง = ไม่มีบรรทัดนี้</div></fieldset>' +
-      '<fieldset><legend>ข้อความในคำสั่ง</legend><div class="info">แก้เฉพาะตอนพิมพ์ ไม่บันทึกลงชีต · 1 บรรทัด = 1 ย่อหน้า</div>' +
+      '<fieldset><legend>ข้อความในคำสั่ง</legend><div class="info">แก้เฉพาะตอนพิมพ์ ไม่บันทึกลงชีต · ย่อหน้านำ/ข้อความปิด: <b>เว้นบรรทัดว่าง = ย่อหน้าใหม่</b> · กด Enter ธรรมดา = ขึ้นบรรทัดต่อในย่อหน้าเดิม (ชิดขอบซ้าย ไม่ย่อหน้า)</div>' +
       '<label class="fl">เรื่อง<textarea id="t-subject" rows="2"></textarea></label>' +
       '<label class="fl">ย่อหน้านำ (ก่อนรายชื่อ)<textarea id="t-intro" rows="7"></textarea></label>' +
       '<label class="fl">ข้อความปิด (หลังรายชื่อ)<textarea id="t-close" rows="4"></textarea></label>' +
@@ -1405,8 +1416,11 @@ function drawNow() {
   var o = effOrder(), host = $('pgs'); R = null;
   if (!DATA || !o) { host.innerHTML = '<div class="empty">ยังไม่มีคำสั่งให้แสดง</div>'; $('info').textContent = DATA ? 'ยังไม่มีคำสั่งให้สร้าง' : ''; $('bprint').disabled = $('bword').disabled = true; pageNow(); return; }
   setZoom();
+  var pv = $('prev'), sy = pv.scrollTop, wy = window.pageYOffset, ph = host.offsetHeight;   // จำตำแหน่งที่เลื่อนอยู่ แล้วคืนให้หลังสร้างใหม่ (ไม่เด้งกลับหน้า 1)
+  if (ph) host.style.minHeight = ph + 'px';
   try { R = O5ORDER.render(host, DATA, o, opts()); }
-  catch (e) { host.innerHTML = '<div class="empty">สร้างคำสั่งไม่ได้</div>'; $('info').textContent = ''; toast('สร้างคำสั่งไม่ได้: ' + e.message, true); $('bprint').disabled = $('bword').disabled = true; return; }
+  catch (e) { host.style.minHeight = ''; host.innerHTML = '<div class="empty">สร้างคำสั่งไม่ได้</div>'; $('info').textContent = ''; toast('สร้างคำสั่งไม่ได้: ' + e.message, true); $('bprint').disabled = $('bword').disabled = true; return; }
+  pv.scrollTop = sy; if (wy) window.scrollTo(0, wy); host.style.minHeight = ''; pv.scrollTop = sy; if (wy) window.scrollTo(0, wy);
   var n = 0; o.committees.forEach(function (c) { n += c.members.length; });
   $('info').textContent = R.pages.length + ' หน้า · ' + o.committees.length + ' คณะ · ' + n + ' รายชื่อ';
   $('bprint').disabled = $('bword').disabled = false; pageNow();
