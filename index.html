@@ -30,6 +30,7 @@ main{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:14px}
 .grow{flex:1}
 .spin{width:22px;height:22px;border:3px solid var(--accs);border-top-color:var(--acc);border-radius:50%;animation:sp 1s linear infinite;flex:none}@keyframes sp{to{transform:rotate(360deg)}}
 .hint{border-radius:10px;padding:10px 14px;background:var(--accs);font-size:18px}.hint.warn{background:var(--warns)}.hint.bad{background:var(--bads);color:var(--bad)}
+.hint.ok{background:var(--oks);color:var(--ok)}.chk{list-style:none;margin:6px 0;padding:0}.chk li{padding:3px 0 3px 0;color:var(--ink)}.chk li.d{color:var(--mute)}.chk li.d span.bx{color:var(--ok)}.chk li.u span.bx{color:var(--warn);font-weight:700}.chk i{color:var(--mute)}
 .hint ul{margin:6px 0 0;padding-left:22px}.hint summary{cursor:pointer;font-weight:700}
 .login{max-width:520px;margin:30px auto 0;width:100%}.login input[type=password],.login input[type=url]{flex:1;min-width:0}
 .err{color:var(--bad);font-size:17px;min-height:1.4em}
@@ -2222,6 +2223,7 @@ function pageGo(d) { var pg = pages(); if (!pg.length) return; var n = Math.max(
 function drawNow() {
   clearTimeout(TM); TM = 0;
   if (MODE === 'ann') { drawAnn(); return; }
+  $('info').classList.remove('bad');
   var o = effOrder(), host = $('pgs'); R = null;
   if (!DATA || !o) { host.innerHTML = '<div class="empty">ยังไม่มีคำสั่งให้แสดง</div>'; $('info').textContent = DATA ? 'ยังไม่มีคำสั่งให้สร้าง' : ''; $('bprint').disabled = $('bword').disabled = true; pageNow(); return; }
   setZoom();
@@ -2265,6 +2267,17 @@ function saveFormA() { var a = curA(), g = $('a-dg').value === 'ar' ? 'ar' : 'th
 function warnsA() {
   var a = curA(), w = ((DATA && DATA.annWarn) || []).concat(a ? a.warn || [] : []);
   $('warn').innerHTML = w.length ? '<div class="hint warn"><details open><summary>⚠ ข้อสังเกตจากชีต ' + w.length + ' ข้อ (ไม่พิมพ์ลงประกาศ)</summary><ul>' + w.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></details></div>' : '';
+  checksA();
+}
+/* เช็กลิสต์ "ต้องตรวจก่อนพิมพ์จริง" (แท็บ ประกาศ·ตรวจ ในชีต) — ดูอย่างเดียว ติ๊กในชีตแล้วกด ↻ · ไม่พิมพ์ลงประกาศ · ไม่บล็อกการพิมพ์ (ร่างพิมพ์ดูได้) */
+function chkLeft(a) { var n = 0; ((a && a.checks) || []).forEach(function (c) { if (!c.done) n++; }); return n; }
+function checksA() {
+  var el = $('chk'); if (!el) return;
+  var a = curA(), c = (a && a.checks) || [], n = chkLeft(a);
+  if (!c.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="hint ' + (n ? 'warn' : 'ok') + '"><details' + (n ? ' open' : '') + '><summary><b>' + (n ? '☐ ต้องตรวจก่อนพิมพ์จริง — ยังไม่ตรวจ ' + n + ' จาก ' + c.length + ' ข้อ' : '☑ ตรวจครบ ' + c.length + ' ข้อแล้ว') + '</b></summary><ul class="chk">' +
+    c.map(function (x) { return '<li class="' + (x.done ? 'd' : 'u') + '"><span class="bx">' + (x.done ? '☑' : '☐') + '</span> ' + esc(x.t) + (x.note ? ' <i>— ' + esc(x.note) + '</i>' : '') + '</li>'; }).join('') +
+    '</ul><div class="info">ติ๊กช่อง <b>ตรวจแล้ว</b> ในชีต (แท็บ <b>ประกาศ·ตรวจ</b>) แล้วกด <b>↻ โหลดใหม่</b> · รายการนี้ไม่พิมพ์ลงประกาศ</div></details></div>';
 }
 function showAnn() {
   var l = annList(), has = l.length > 0, key = has ? 'ann' : 'ann0';
@@ -2274,7 +2287,7 @@ function showAnn() {
         '<div class="hint warn">' + (DATA.anns ? 'แท็บประกาศในชีตยังไม่มีประกาศที่ใช้ได้' : 'ยังไม่มีข้อมูลประกาศในชีต (ไม่พบแท็บ <b>ประกาศ·แม่แบบ</b>)') + ' — ตั้งค่าตาม <b>วิธีติดตั้ง.txt ส่วน F</b> (วางสคริปต์ตั้งค่าประกาศ → รัน Preview → รัน Setup) แล้วกด ↻ โหลดใหม่</div><div id="warn"></div></section>');
     } else {
       view('<section class="card side"><div class="row"><h2 style="margin:0">ตั้งค่าประกาศ</h2><span class="grow"></span><button type="button" id="bref" title="โหลดข้อมูลจากชีตใหม่ (ทำหลังแก้ชีต)">↻ โหลดใหม่</button></div><div class="info" id="age"></div>' +
-        '<label class="fl">ประกาศ<select id="a-ann"></select></label><div id="warn"></div>' +
+        '<label class="fl">ประกาศ<select id="a-ann"></select></label><div id="warn"></div><div id="chk"></div>' +
         '<fieldset><legend>หัวประกาศ</legend><div class="fgrid">' +
         '<label>ประกาศ ณ วันที่<input id="a-date" type="date"></label>' +
         '<label>ตัวเลขในประกาศ<select id="a-dg"><option value="th">เลขไทย (๑ ๒ ๓)</option><option value="ar">เลขอารบิก (1 2 3)</option></select></label></div>' +
@@ -2299,7 +2312,7 @@ function showAnn() {
   warnsA(); draw();
 }
 function drawAnn() {
-  clearTimeout(TM); TM = 0;
+  clearTimeout(TM); TM = 0; $('info').classList.remove('bad');
   var a = curA(), host = $('pgs'); R = null;
   if (!DATA || !a) { host.innerHTML = '<div class="empty">ยังไม่มีประกาศให้แสดง</div>'; $('info').textContent = DATA ? 'ยังไม่มีประกาศให้สร้าง' : ''; $('bprint').disabled = $('bword').disabled = true; pageNow(); return; }
   setZoom();
@@ -2308,7 +2321,9 @@ function drawAnn() {
   try { R = O5ORDER.renderAnn(host, DATA, a, optsA()); }
   catch (e) { host.style.minHeight = ''; host.innerHTML = '<div class="empty">สร้างประกาศไม่ได้</div>'; $('info').textContent = ''; toast('สร้างประกาศไม่ได้: ' + e.message, true); $('bprint').disabled = $('bword').disabled = true; return; }
   pv.scrollTop = sy; if (wy) window.scrollTo(0, wy); host.style.minHeight = ''; pv.scrollTop = sy; if (wy) window.scrollTo(0, wy);
-  $('info').textContent = R.pages.length + ' หน้า' + (optsA().date ? '' : ' · ยังไม่กรอกวันที่ประกาศ (เว้นที่ว่างไว้)');
+  var nl = chkLeft(a);
+  $('info').textContent = R.pages.length + ' หน้า' + (optsA().date ? '' : ' · ยังไม่กรอกวันที่ประกาศ (เว้นที่ว่างไว้)') + (nl ? ' · ⚠ ต้องตรวจก่อนพิมพ์จริง ยังไม่ตรวจ ' + nl + ' ข้อ' : '');
+  $('info').classList.toggle('bad', nl > 0);
   $('bprint').disabled = $('bword').disabled = false; pageNow();
 }
 
