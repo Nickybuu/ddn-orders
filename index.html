@@ -1488,20 +1488,32 @@ var O5ORDER = (function () {
       เช่น ให้ผู้ที่ได้รับ… · เพื่อให้การดำเนินงาน… · อาศัยอำนาจ… · ความสะดวก… · และเกิด… · โดยให้อยู่… · ถูกต้อง… */
   var FN = /^(?:ให้|ผู้|ที่|ซึ่ง|ได้|และ|หรือ|ของ|แก่|ใน|ตาม|โดย|เพื่อ|จึง|จะ|ไม่|ต้อง|ควร|กับ|แต่|ว่า|การ|ความ|แห่ง|จาก|ถึง|ต่อ|แล้ว|ทั้ง|ทุก|อัน|ก็|มี|เป็น|ยัง|นาย|นาง|นางสาว)+$/;   // คำช่วยล้วน (ต่อกันได้ เช่น ผู้ที่ ตามที่ ให้การ)
   var TAILW = /^(?:งาน|ภาพ|กรรม|ผล)$/;                                                                                                  // ส่วนท้ายของคำประสมที่ตัวตัดคำแยกออก
-  function firstWord(t) {
+  /** ประกาศ (ระบบ 6): ต้นฉบับร่างประกาศเขียนคำต่อท้ายหน้าเป็นคำ/วลีที่สมบูรณ์ เช่น /๖. ค่าใช้จ่าย... /๒. วิธีการรับสมัคร... /๖. วันรายงานตัว... /๑.๒.๗ มีความตั้งใจ...
+      แต่ตัวตัดคำของเบราว์เซอร์แยกคำประสมออกเป็นท่อน (ค่าใช้|จ่าย เกี่ยว|กับ ไม่ต่ำ|กว่า รายงาน|ตัว แผนการ|เรียน) → ประกาศใช้เกณฑ์ยาวอย่างน้อย 10 ตัวอักษร (คำสั่งยังใช้ 6 ตามเดิม)
+      และไม่หยุดหน้าท่อนท้ายที่ห้อยท้ายไม่ได้ (TAILA = ท่อนที่ไม่ขึ้นต้นคำเอง) · ยาวเกิน 22 ตัวอักษรหยุดเลย */
+  var TAILA = /^(?:งาน|ภาพ|กรรม|ผล|จ่าย|กับ|กว่า|ตัว|หน้า|หน้าที่|ศึกษา|การศึกษา|กรรมการ|ครอง|เลือก|สมัคร|เรียน|การเรียน|ทฤษฎี|ปฏิบัติ|แวดล้อม|บ้าน|ยากจน|ดัดดรุณี|ดรุณี)ฯ?$/;
+  var LANG = /^(?:อังกฤษ|ไทย|จีน|ญี่ปุ่น|เกาหลี|ฝรั่งเศส|เยอรมัน)ฯ?$/;
+  var ANNW = { min: 10, tail: { test: function (nx, out) { return TAILA.test(nx) || (nx === 'การ' && /ผล$/.test(out)) || (LANG.test(nx) && /ภาษา$/.test(out)) || (nx === 'ดัด' && /โรงเรียน$/.test(out)); } } };   // ผล|การเรียน · ภาษา|อังกฤษ · โรงเรียน|ดัด|ดรุณี
+  function firstWord(t, o) {
     t = String(t || '').replace(/^\s+/, '');
     if (!SEG) return t.split(/\s+/)[0];
+    var min = o ? o.min : 6, tail = o ? o.tail : TAILW;
+    var eff = function (x) { return o ? x.replace(/[\s๐-๙0-9()]/g, '').length : x.length; };   // ประกาศ: นับเฉพาะตัวอักษร (ไม่นับเว้นวรรค/เลข/วงเล็บ)
     var segs = Array.from(SEG.segment(t)), out = '', i;
     for (i = 0; i < segs.length; i++) {
       var g = segs[i].segment;
-      if (/\s/.test(g)) { if (out) break; continue; }
+      if (/\s/.test(g)) {
+        if (out) { if (o && eff(out) < 6 && segs[i + 1] && !/^[.…]/.test(segs[i + 1].segment)) { out += ' '; continue; } break; }   // ประกาศ: คำแรกสั้น (ข้อ ปีที่ วันที่ ๒๘ …) เก็บคำถัดไปด้วย เช่น /๕.๓ วัน เวลา... (ไม่เก็บเส้นจุดกรอก)
+        continue;
+      }
       out += g;
       if (out.length > 22) break;
       var nx = segs[i + 1] && segs[i + 1].segment;
       if (nx && nx.indexOf('การ') === 0 && /(?:อำนวย|ดำเนิน)$/.test(out)) { out += 'การ'; break; }   // อำนวย|การ ดำเนิน|การ (ตัวตัดคำบางครั้งเป็น การก|ลุ่ม)
-      if (segs[i].isWordLike && out.length >= 6 && !FN.test(g) && !(nx && TAILW.test(nx))) break;
+      if (o && nx && (/^[”’)\]]/.test(nx) || (/^[.\-\/@]/.test(nx) && /[A-Za-z0-9]$/.test(out)))) continue;   // ประกาศ: เก็บเครื่องหมายปิดคำพูด/วงเล็บ และที่อยู่เว็บ (www.ddn.ac.th) ให้ครบ
+      if (segs[i].isWordLike && eff(out) >= min && !FN.test(o ? g.replace(/^[๐-๙0-9]+/, '') : g) && !(nx && tail.test(nx, out))) break;
     }
-    return out;
+    return o ? out.replace(/\s+$/, '') : out;
   }
   /** คำต่อท้ายหน้า (ข้อความต้นหน้าถัดไป) เช่น /๑.๒๑ นางสาวสมัย... · /๒. คณะกรรมการ... · /มีหน้าที่... */
   function contOf(a) {
@@ -1968,7 +1980,7 @@ var O5ORDER = (function () {
     t = plain(t).replace(/\s+/g, ' ').replace(/^ /, '');
     if (it.k === 'aah' && t.length <= 24) return '/' + t + '...';
     var m = a.line > 0 ? null : NUMP.exec(t);
-    return '/' + (m ? m[1] + ' ' + firstWord(t.slice(m[0].length)) : firstWord(t)) + '...';
+    return '/' + (m ? m[1] + ' ' + firstWord(t.slice(m[0].length), ANNW) : firstWord(t, ANNW)) + '...';
   }
   /** สร้างหน้าประกาศใน host · คืน { pages, items, atoms, plan } (items มีค่าที่วัดแล้ว ใช้สร้าง Word ต่อ) */
   function renderAnn(host, data, ann, opts) {
@@ -2072,7 +2084,7 @@ var O5ORDER = (function () {
   }
 
   var api = { G: G, plain: plain, boldParts: boldParts, sbcols: sbcols, digits: digits, thaiDate: thaiDate, tcols: tcols, ncol: ncol, tabcols: tabcols, labcols: labcols, layout: layout, columns: columns, render: render, measurer: measurer, contOf: contOf, MM: MM,
-              GA: GA, annLayout: annLayout, annPrep: annPrep, renderAnn: renderAnn, contAnn: contAnn, NUMP: NUMP };
+              GA: GA, annLayout: annLayout, annPrep: annPrep, renderAnn: renderAnn, contAnn: contAnn, firstWordAnn: function (t) { return firstWord(t, ANNW); }, NUMP: NUMP };
   if (typeof window !== 'undefined') window.O5ORDER = api;
   return api;
 })();
