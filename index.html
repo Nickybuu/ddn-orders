@@ -136,9 +136,9 @@ textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radiu
 .o5-tm>div{width:100%}
 .o5-lc{position:relative}
 .o5-lcl{position:absolute;left:1.9mm;top:0}
-/* ข้อย่อย ● / - (ข้อความจัดกระจายแบบข้อหน้าที่ · เครื่องหมายวาดด้วย CSS ไม่พึ่งฟอนต์ ฟอนต์ที่ฝังไม่มีตัว ●) · สองคอลัมน์ (ด้านดนตรี │ ณ ห้องดนตรี) · ตัวหนา **…** · ช่องตารางมีป้ายนำหน้า (กรรมการสำรอง + ชื่อ) */
+/* ข้อย่อย ● / - (ข้อความจัดกระจายแบบข้อหน้าที่ · เครื่องหมายวาดด้วย CSS ไม่พึ่งฟอนต์ ฟอนต์ที่ฝังไม่มีตัว ●) · จุด ● ใส่ print-color-adjust:exact เพื่อให้พิมพ์ออกแม้ไม่ได้เปิด "กราฟิกพื้นหลัง" ในหน้าต่างพิมพ์ (ห้ามเปลี่ยนไปวาดด้วยเส้นขอบ: Chrome ปัดความหนาเส้นขอบลงเป็นพิกเซลเต็ม จุดจะเล็กกว่า 1.9 มม.) · สองคอลัมน์ (ด้านดนตรี │ ณ ห้องดนตรี) · ตัวหนา **…** · ช่องตารางมีป้ายนำหน้า (กรรมการสำรอง + ชื่อ) */
 .o5-sb{position:relative}
-.o5-bl1::before,.o5-dot::before{content:'';position:absolute;left:var(--bx,17.5mm);top:2.3mm;width:1.9mm;height:1.9mm;border-radius:50%;background:#000}
+.o5-bl1::before,.o5-dot::before{content:'';position:absolute;left:var(--bx,17.5mm);top:2.3mm;width:1.9mm;height:1.9mm;border-radius:50%;background:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .o5-bl2::before{content:'-';position:absolute;left:var(--bx)}
 .o5-sbc{white-space:nowrap}
 .o5-sbm{position:absolute;top:0}
@@ -146,7 +146,7 @@ textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radiu
 /* ระบบ 6 ประกาศรับสมัคร (section.o5pg.o6pg · ค่าต้องตรงกับ GA ใน order_render.js): ขอบ ซ้าย 30 ขวา 20 บน 12.5 ล่าง 20 มม. · หน้า 2+ เลขหน้าที่ 12.5 เนื้อความเริ่ม 25.098
    ครุฑกรอบ 32 มม. เว้นใต้ครุฑ 1.4 · ชื่อประกาศ 18 pt หนา · หัว 16 pt หนา · เส้นจุดคั่น · ย่อหน้าเยื้องบรรทัดแรกตามระดับ (style ในหน้า) บรรทัดต่อชิดซ้าย
    · หมายเหตุ: ป้ายตัวหนาที่ --lx ข้อความแขวนหลังป้าย · ตาราง: ตัดบรรทัดในช่องได้ แถวรายการเยื้องบรรทัดแรก 5 มม. · ประกาศ ณ วันที่ เยื้อง 31.5 · ลงนามกล่อง 44–124 เว้น 4 บรรทัด */
-.o5pg.o6pg{padding:12.5mm 20mm 20mm 30mm}
+.o5pg.o6pg{padding:12.5mm 20mm 20mm 30mm;font-family:'DDNSarabun','TH SarabunPSK','TH Sarabun New','TH SarabunIT๙',sans-serif}   /* ฟอนต์ฝังไม่มี “ ” ‘ ’ • → ใช้ TH Sarabun ที่ติดตั้งในเครื่อง (เพิ่ม IT๙ ตามไฟล์ Word) */
 .o5pg.o6pg.o5-p2{padding-top:25.098mm}
 .o6pg>.o5-pn{top:12.5mm;left:30mm;right:20mm}
 .o6pg>.o5-cont{right:20mm;bottom:20mm}
@@ -165,6 +165,22 @@ textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radiu
 .o6-pb{height:0;overflow:hidden}
 .o6-date{padding-left:31.5mm}
 .o6-sign{margin-left:44mm;width:80mm;padding-top:25.197mm;text-align:center}
+/* ห้องเรียนพิเศษ (ช่วง 6C · ค่าตรงกับ GA.schDot/schCol/formSp/qrQuiet ใน order_render.js): กำหนดการ = ● ที่ --bx · ป้ายตัวหนาที่ --lx · ข้อความเริ่มที่คอลัมน์ (padding-left ในหน้า) บรรทัดต่ออยู่ใต้คอลัมน์
+   · กล่อง = กรอบ 0.5 pt ข้อความกึ่งกลาง · ฟอร์ม = ข้อความ + ช่องกรอกจุด (วางตำแหน่งที่วัดแล้ว บรรทัดเดียว) · ลงชื่อฟอร์ม · QR (SVG · ยังไม่มีลิงก์ = กรอบเส้นประ) · ครุฑหน้าแนบ
+   · จุด ● 1.9 มม. ใส่ print-color-adjust:exact (เบราว์เซอร์ไม่พิมพ์สีพื้นถ้าไม่ได้เลือก "กราฟิกพื้นหลัง" ถ้าไม่ใส่ · อย่าวาดด้วยเส้นขอบ: Chrome ปัดความหนาเส้นลงเป็นพิกเซลเต็ม จุดเล็กลง) */
+.o6-sch{position:relative}
+.o6-sch[data-label]::before{content:attr(data-label);position:absolute;left:var(--lx,0);top:0;font-weight:700;text-indent:0;letter-spacing:0;white-space:nowrap}
+.o6-sch.o6-ln[data-label]::before{font-weight:400}
+.o6-dot::after{content:'';position:absolute;left:var(--bx,0);top:2.2mm;width:1.9mm;height:1.9mm;border-radius:50%;background:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.o6-box{border:.5pt solid #000;padding:0 1.9mm;text-align:center}
+.o6-form{position:relative;height:6.299mm;white-space:nowrap}
+.o6-fp{position:absolute;top:0;left:0;white-space:pre}
+.o6-fd{overflow:hidden;text-indent:0}
+.o6-fsig>div{white-space:pre}
+.o6-qri{line-height:0}
+.o6-qri>svg{display:block;width:100%;height:100%}
+.o6-qr0{box-sizing:border-box;height:100%;border:.5pt dashed #000;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.116;font-size:12pt}
+.o6-qrl{text-align:center;white-space:nowrap}
 </style></head><body>
 <header class="top"><img id="logo" alt="ตราโรงเรียนดัดดรุณี"><div><h1 id="ttl">จัดทำคำสั่งราชการ</h1><div class="sub">โรงเรียนดัดดรุณี · งานรับนักเรียน</div></div><span class="grow"></span><button id="bout" class="hide" type="button">ออกจากระบบ</button></header>
 <nav id="modes" class="hide noprint" aria-label="ชนิดเอกสาร"><button type="button" id="mord" class="on">📑 คำสั่ง</button><button type="button" id="mann">📣 ประกาศรับสมัคร</button></nav>
@@ -813,7 +829,8 @@ var DDNDOCX = (function () {
       (p.tabs && p.tabs.length ? '<w:tabs>' + p.tabs.slice().sort(function (a, b) { return a.pos - b.pos; }).map(function (t) {
         return '<w:tab w:val="' + (t.val || 'left') + '"' + (t.leader ? ' w:leader="' + t.leader + '"' : '') + ' w:pos="' + Math.round(t.pos) + '"/>';
       }).join('') + '</w:tabs>' : '');
-    return '<w:p><w:pPr>' + pre + '<w:spacing w:before="' + p.before + '" w:after="' + (p.after || 0) + '" w:line="' + p.line + '" w:lineRule="auto"/>' + ind + '<w:jc w:val="' + p.jc + '"/></w:pPr>' +
+    // ตัวเลือกเพิ่ม (ประกาศ ระบบ 6 ช่วง 6C · ไม่ใส่ = เหมือนเดิมทุกไบต์): p.sect = ย่อหน้านี้จบส่วน (section) — build() ใส่ <w:sectPr> ชุดเดียวกับท้ายเอกสารไว้ใน p._sx (ต่อท้าย jc ตามสคีมา)
+    return '<w:p><w:pPr>' + pre + '<w:spacing w:before="' + p.before + '" w:after="' + (p.after || 0) + '" w:line="' + p.line + '" w:lineRule="auto"/>' + ind + '<w:jc w:val="' + p.jc + '"/>' + (p._sx || '') + '</w:pPr>' +
       (p.img ? imgXml(p.img) : p.runs.map(runXml).join('')) + '</w:p>';
   }
   /** model = { paras:[...], mt, mr, mb, ml (twips), title } → ไบต์ของไฟล์ .docx
@@ -823,12 +840,14 @@ var DDNDOCX = (function () {
     var font = model.font || FONT, hd = model.header && model.header.paras && model.header.paras.length ? model.header : null;
     var imgs = [];
     model.paras.forEach(function (p) { if (p.img) { imgs.push(p.img); p.img.id = imgs.length; } });
+    var sect = '<w:sectPr>' + (hd ? '<w:headerReference w:type="default" r:id="rIdHdr1"/><w:headerReference w:type="first" r:id="rIdHdr2"/>' : '') +
+      '<w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="' + model.mt + '" w:right="' + model.mr + '" w:bottom="' + model.mb + '" w:left="' + model.ml + '" w:header="' + (model.hdr || 284) + '" w:footer="284" w:gutter="0"/>' +
+      '<w:cols w:space="720"/>' + (hd ? '<w:titlePg/>' : '') + '<w:docGrid w:linePitch="360"/></w:sectPr>';   // ส่วนทุกส่วนใช้ค่าเดียวกัน (หน้าแรกของแต่ละส่วนใช้หัวกระดาษว่าง = ไม่มีเลขหน้า)
+    model.paras.forEach(function (p) { if (p.sect && !p.tbl) p._sx = sect; });
     var ct = { png: 'image/png', jpg: 'image/jpeg', gif: 'image/gif' }, exts = {};
     imgs.forEach(function (m) { exts[m.ext] = 1; });
     var doc = HDR + '<w:document ' + NS + ' xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><w:body>' + model.paras.map(parXml).join('') +
-      '<w:sectPr>' + (hd ? '<w:headerReference w:type="default" r:id="rIdHdr1"/><w:headerReference w:type="first" r:id="rIdHdr2"/>' : '') +
-      '<w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="' + model.mt + '" w:right="' + model.mr + '" w:bottom="' + model.mb + '" w:left="' + model.ml + '" w:header="' + (model.hdr || 284) + '" w:footer="284" w:gutter="0"/>' +
-      '<w:cols w:space="720"/>' + (hd ? '<w:titlePg/>' : '') + '<w:docGrid w:linePitch="360"/></w:sectPr></w:body></w:document>';
+      sect + '</w:body></w:document>';
     var styles = HDR + '<w:styles ' + NS + '><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="' + font + '" w:eastAsia="' + font + '" w:hAnsi="' + font + '" w:cs="' + font + '"/>' +
       '<w:sz w:val="32"/><w:szCs w:val="32"/><w:lang w:val="en-US" w:eastAsia="en-US" w:bidi="th-TH"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
       '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>' +
@@ -996,6 +1015,208 @@ var DDNDOCX = (function () {
   return api;
 })();
 /*DOCX-END*/</script>
+<script>/* ระบบ 6 ประกาศรับสมัคร — ตัวสร้าง QR Code (ช่วง 6C · 10 ต.ค. 69)
+   ต้นฉบับ: ระบบรับนักเรียน/_สำหรับพัฒนา/ระบบ5_คำสั่ง/src/qr.js · build.py ฝังในหน้าเว็บ (ช่อง O6QR) · ไม่ใช้ไลบรารีภายนอก ไม่ใช้อินเทอร์เน็ต (สร้างในเครื่องผู้ใช้)
+   เขียนตามมาตรฐาน ISO/IEC 18004: โหมดไบต์ (UTF-8) · รุ่น 1–10 (ข้อความได้ถึง 271 ไบต์ที่ระดับ L / 213 ที่ M) · แก้ผิดระดับ L M Q H (ค่าเริ่มต้น M · เพิ่มระดับให้เองถ้ารุ่นเดิมยังพอ)
+   · เลือกหน้ากาก (mask) 0–7 ตามคะแนนโทษมาตรฐาน · ทดสอบถอดรหัสด้วย OpenCV ทุกรุ่น × ทุกระดับ (ระบบ6_ประกาศ/tests/test_qr.js)
+   ใช้: q = O6QR.make(ข้อความ, 'M') → { size, v, ecl, mask, dark(x, y) } (x = คอลัมน์ · y = แถว · true = ช่องดำ) · ยาวเกินรุ่น 10 = throw
+        O6QR.svg(q, ขอบ) → ข้อความ <svg> (viewBox เป็นช่อง · ขอบ = ช่องว่างรอบรหัส หน่วยเป็นช่อง) · O6QR.png(q, พิกเซลต่อช่อง, ขอบ) → Uint8Array (PNG ขาวดำ 1 บิต ไว้ใส่ไฟล์ Word) */
+var O6QR = (function () {
+  'use strict';
+  var ECL = { L: 0, M: 1, Q: 2, H: 3 }, FMT = [1, 0, 3, 2];                       // ลำดับในตาราง · บิตระดับแก้ผิดในรูปแบบ (format bits)
+  // ตามรุ่น 1–10 (ช่อง 0 ไม่ใช้): จำนวนไบต์แก้ผิดต่อบล็อก · จำนวนบล็อก — ตารางมาตรฐาน (ตรวจกับความจุมาตรฐานใน test_qr.js)
+  var ECC = [[0, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18], [0, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26], [0, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24], [0, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28]];
+  var BLK = [[0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4], [0, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5], [0, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8], [0, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8]];
+  var ALIGN = [null, [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50]];
+  var VMAX = 10;
+  function rawModules(v) { var r = (16 * v + 128) * v + 64; if (v >= 2) { var na = Math.floor(v / 7) + 2; r -= (25 * na - 10) * na - 55; if (v >= 7) r -= 36; } return r; }
+  function dataBytes(v, e) { return Math.floor(rawModules(v) / 8) - ECC[e][v] * BLK[e][v]; }
+  function utf8(s) {
+    s = String(s); var out = [];
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c >= 0xD800 && c < 0xDC00 && i + 1 < s.length) { var d = s.charCodeAt(i + 1); if (d >= 0xDC00 && d < 0xE000) { c = 0x10000 + ((c - 0xD800) << 10) + (d - 0xDC00); i++; } }
+      if (c < 0x80) out.push(c);
+      else if (c < 0x800) out.push(0xC0 | c >> 6, 0x80 | c & 63);
+      else if (c < 0x10000) out.push(0xE0 | c >> 12, 0x80 | c >> 6 & 63, 0x80 | c & 63);
+      else out.push(0xF0 | c >> 18, 0x80 | c >> 12 & 63, 0x80 | c >> 6 & 63, 0x80 | c & 63);
+    }
+    return out;
+  }
+  // ---- Reed–Solomon บน GF(256) พหุนาม 0x11D ----
+  function gmul(x, y) { var z = 0; for (var i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z & 255; }
+  function rsDivisor(deg) {
+    var r = [], i, j, root = 1;
+    for (i = 0; i < deg - 1; i++) r.push(0);
+    r.push(1);
+    for (i = 0; i < deg; i++) {
+      for (j = 0; j < r.length; j++) { r[j] = gmul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; }
+      root = gmul(root, 2);
+    }
+    return r;
+  }
+  function rsRemainder(data, div) {
+    var r = div.map(function () { return 0; });
+    data.forEach(function (b) {
+      var f = b ^ r.shift(); r.push(0);
+      div.forEach(function (c, i) { r[i] ^= gmul(c, f); });
+    });
+    return r;
+  }
+  /** ข้อความ → ตาราง QR · ecl = 'L' | 'M' | 'Q' | 'H' (ค่าเริ่มต้น M) */
+  function make(text, ecl, fixMask) {
+    var e = ECL[ecl] !== undefined ? ECL[ecl] : 1, bytes = utf8(text), v, i;
+    var bitsFor = function (vv) { return 4 + (vv <= 9 ? 8 : 16) + 8 * bytes.length; };
+    for (v = 1; v <= VMAX; v++) if (bitsFor(v) <= dataBytes(v, e) * 8) break;
+    if (v > VMAX) throw new Error('ข้อความยาวเกินไปสำหรับ QR (' + bytes.length + ' ไบต์ · ได้ไม่เกิน ' + (dataBytes(VMAX, e) - 3) + ' ไบต์)');
+    for (i = e + 1; i <= 3; i++) if (bitsFor(v) <= dataBytes(v, i) * 8) e = i;          // รุ่นเดิมยังพอ → เพิ่มระดับแก้ผิด (สแกนติดง่ายขึ้นเมื่อพิมพ์)
+    // บิตข้อมูล: โหมดไบต์ 0100 · จำนวนไบต์ · ข้อมูล · ตัวจบ 0000 · เติมให้ครบไบต์ · ไบต์เติม EC 11
+    var bb = [], put = function (val, n) { for (var k = n - 1; k >= 0; k--) bb.push((val >>> k) & 1); };
+    put(4, 4); put(bytes.length, v <= 9 ? 8 : 16); bytes.forEach(function (b) { put(b, 8); });
+    var cap = dataBytes(v, e) * 8;
+    put(0, Math.min(4, cap - bb.length));
+    put(0, (8 - bb.length % 8) % 8);
+    for (var pad = 0xEC; bb.length < cap; pad ^= 0xEC ^ 0x11) put(pad, 8);
+    var data = [];
+    for (i = 0; i < bb.length; i += 8) { var x = 0; for (var k = 0; k < 8; k++) x = x << 1 | bb[i + k]; data.push(x); }
+    // แบ่งบล็อก + ไบต์แก้ผิด + สลับไบต์ (interleave)
+    var nb = BLK[e][v], el = ECC[e][v], raw = Math.floor(rawModules(v) / 8), nShort = nb - raw % nb, shortLen = Math.floor(raw / nb), div = rsDivisor(el), blocks = [], q = 0;
+    for (i = 0; i < nb; i++) {
+      var dat = data.slice(q, q + shortLen - el + (i < nShort ? 0 : 1)); q += dat.length;
+      var ec = rsRemainder(dat, div);
+      if (i < nShort) dat.push(0);
+      blocks.push(dat.concat(ec));
+    }
+    var cw = [];
+    for (i = 0; i < blocks[0].length; i++) blocks.forEach(function (b, j) { if (i !== shortLen - el || j >= nShort) cw.push(b[i]); });
+    // วาด
+    var n = v * 4 + 17, mod = [], fn = [];
+    for (i = 0; i < n; i++) { mod.push([]); fn.push([]); for (k = 0; k < n; k++) { mod[i].push(false); fn[i].push(false); } }
+    var set = function (x, y, d) { mod[y][x] = d; fn[y][x] = true; };
+    for (i = 0; i < n; i++) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }                       // เส้นจังหวะ (timing)
+    [[3, 3], [n - 4, 3], [3, n - 4]].forEach(function (c) {                                          // ตัวหาตำแหน่ง 3 มุม + ขอบขาว
+      for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++) {
+        var dist = Math.max(Math.abs(dx), Math.abs(dy)), xx = c[0] + dx, yy = c[1] + dy;
+        if (xx >= 0 && xx < n && yy >= 0 && yy < n) set(xx, yy, dist !== 2 && dist !== 4);
+      }
+    });
+    var al = ALIGN[v];
+    for (i = 0; i < al.length; i++) for (k = 0; k < al.length; k++) {                                // ตัวจัดแนว (alignment)
+      if (i === 0 && k === 0 || i === 0 && k === al.length - 1 || i === al.length - 1 && k === 0) continue;
+      for (var ay = -2; ay <= 2; ay++) for (var ax = -2; ax <= 2; ax++) set(al[i] + ax, al[k] + ay, Math.max(Math.abs(ax), Math.abs(ay)) !== 1);
+    }
+    var drawFormat = function (mask) {
+      var d = FMT[e] << 3 | mask, r = d;
+      for (var t = 0; t < 10; t++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+      var bits = (d << 10 | r) ^ 0x5412, bit = function (j) { return ((bits >>> j) & 1) !== 0; }, j;
+      for (j = 0; j <= 5; j++) set(8, j, bit(j));
+      set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+      for (j = 9; j < 15; j++) set(14 - j, 8, bit(j));
+      for (j = 0; j < 8; j++) set(n - 1 - j, 8, bit(j));
+      for (j = 8; j < 15; j++) set(8, n - 15 + j, bit(j));
+      set(8, n - 8, true);                                                                            // จุดดำคงที่
+    };
+    drawFormat(0);                                                                                    // จองที่ไว้ก่อน (เขียนจริงหลังเลือกหน้ากาก)
+    if (v >= 7) {                                                                                     // ข้อมูลรุ่น (รุ่น 7 ขึ้นไป)
+      var rv = v; for (i = 0; i < 12; i++) rv = (rv << 1) ^ ((rv >>> 11) * 0x1F25);
+      var vb = v << 12 | rv;
+      for (i = 0; i < 18; i++) { var c1 = ((vb >>> i) & 1) !== 0, a = n - 11 + i % 3, b = Math.floor(i / 3); set(a, b, c1); set(b, a, c1); }
+    }
+    // วางบิตข้อมูลแบบงูเลื้อยทีละ 2 คอลัมน์จากขวาล่าง
+    var bi = 0;
+    for (var right = n - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (var vert = 0; vert < n; vert++) for (var jj = 0; jj < 2; jj++) {
+        var xx2 = right - jj, up = ((right + 1) & 2) === 0, yy2 = up ? n - 1 - vert : vert;
+        if (!fn[yy2][xx2] && bi < cw.length * 8) { mod[yy2][xx2] = ((cw[bi >>> 3] >>> (7 - (bi & 7))) & 1) !== 0; bi++; }
+      }
+    }
+    var MASK = [function (x, y) { return (x + y) % 2 === 0; }, function (x, y) { return y % 2 === 0; }, function (x) { return x % 3 === 0; }, function (x, y) { return (x + y) % 3 === 0; },
+      function (x, y) { return (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0; }, function (x, y) { return x * y % 2 + x * y % 3 === 0; },
+      function (x, y) { return (x * y % 2 + x * y % 3) % 2 === 0; }, function (x, y) { return ((x + y) % 2 + x * y % 3) % 2 === 0; }];
+    var apply = function (m) { for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (!fn[y][x] && MASK[m](x, y)) mod[y][x] = !mod[y][x]; };
+    var best = -1, bestScore = Infinity;
+    for (var m = 0; m < 8; m++) { apply(m); drawFormat(m); var sc = penalty(mod, n); if (sc < bestScore) { bestScore = sc; best = m; } apply(m); }
+    if (fixMask >= 0 && fixMask <= 7) best = fixMask;                                                 // ใช้ในชุดทดสอบเท่านั้น (เทียบกับตัวสร้างอ้างอิง)
+    apply(best); drawFormat(best);
+    return { size: n, v: v, ecl: 'LMQH'.charAt(e), mask: best, dark: function (x, y) { return x >= 0 && y >= 0 && x < n && y < n && mod[y][x]; } };
+  }
+  /** คะแนนโทษมาตรฐาน (ใช้เลือกหน้ากาก — มีผลแค่ความง่ายในการสแกน ไม่มีผลกับความถูกต้องของข้อมูล) */
+  function penalty(mod, n) {
+    var res = 0, x, y;
+    var lineScore = function (get) {
+      var s = 0, runColor = false, run = 0, hist = [0, 0, 0, 0, 0, 0, 0];
+      var addHist = function (len) { if (hist[0] === 0) len += n; hist.pop(); hist.unshift(len); };
+      var count = function () { var k = hist[1], core = k > 0 && hist[2] === k && hist[3] === k * 3 && hist[4] === k && hist[5] === k; return (core && hist[0] >= k * 4 && hist[6] >= k ? 1 : 0) + (core && hist[6] >= k * 4 && hist[0] >= k ? 1 : 0); };
+      for (var i = 0; i < n; i++) {
+        var c = get(i);
+        if (c === runColor) { run++; if (run === 5) s += 3; else if (run > 5) s++; }
+        else { addHist(run); if (!runColor) s += count() * 40; runColor = c; run = 1; }
+      }
+      if (runColor) { addHist(run); run = 0; }
+      run += n; addHist(run);
+      return s + count() * 40;
+    };
+    for (y = 0; y < n; y++) res += lineScore(function (i) { return mod[y][i]; });
+    for (x = 0; x < n; x++) res += lineScore(function (i) { return mod[i][x]; });
+    for (y = 0; y < n - 1; y++) for (x = 0; x < n - 1; x++) { var c = mod[y][x]; if (c === mod[y][x + 1] && c === mod[y + 1][x] && c === mod[y + 1][x + 1]) res += 3; }
+    var dark = 0; for (y = 0; y < n; y++) for (x = 0; x < n; x++) if (mod[y][x]) dark++;
+    return res + (Math.ceil(Math.abs(dark * 20 - n * n * 10) / (n * n)) - 1) * 10;
+  }
+  /** ตาราง QR → <svg> (ช่องดำต่อกันในแถวรวมเป็นสี่เหลี่ยมเดียว · พื้นขาว) · quiet = ช่องว่างรอบรหัส (ช่อง) */
+  function svg(q, quiet) {
+    quiet = quiet == null ? 2 : quiet;
+    var n = q.size, W = n + 2 * quiet, d = '';
+    for (var y = 0; y < n; y++) for (var x = 0; x < n;) {
+      if (!q.dark(x, y)) { x++; continue; }
+      var x0 = x; while (x < n && q.dark(x, y)) x++;
+      d += 'M' + (x0 + quiet) + ' ' + (y + quiet) + 'h' + (x - x0) + 'v1h-' + (x - x0) + 'z';
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + W + '" shape-rendering="crispEdges"><rect width="' + W + '" height="' + W + '" fill="#fff"/><path fill="#000" d="' + d + '"/></svg>';
+  }
+  // ---- PNG ขาวดำ 1 บิต (zlib แบบไม่บีบอัด) สำหรับไฟล์ Word ----
+  var CRC = null;
+  function crc32(u, a, b) {
+    if (!CRC) { CRC = []; for (var k = 0; k < 256; k++) { var c = k; for (var j = 0; j < 8; j++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC.push(c >>> 0); } }
+    var x = 0xFFFFFFFF; for (var i = a; i < b; i++) x = CRC[(x ^ u[i]) & 255] ^ (x >>> 8);
+    return (x ^ 0xFFFFFFFF) >>> 0;
+  }
+  function png(q, scale, quiet) {
+    scale = scale || 10; quiet = quiet == null ? 2 : quiet;
+    var n = q.size, W = (n + 2 * quiet) * scale, rowLen = 1 + Math.ceil(W / 8), raw = new Uint8Array(rowLen * W), y, x;
+    for (y = 0; y < W; y++) {
+      var my = Math.floor(y / scale) - quiet, base = y * rowLen;                                       // ไบต์แรกของแถว = ตัวกรอง 0 · บิต 1 = ขาว 0 = ดำ
+      for (x = 0; x < W; x++) if (!q.dark(Math.floor(x / scale) - quiet, my)) raw[base + 1 + (x >> 3)] |= 0x80 >> (x & 7);
+    }
+    var nBlk = Math.max(1, Math.ceil(raw.length / 65535)), z = new Uint8Array(2 + raw.length + 5 * nBlk + 4), p = 0, s1 = 1, s2 = 0;
+    z[p++] = 0x78; z[p++] = 0x01;
+    for (var off = 0, bi = 0; bi < nBlk; bi++) {
+      var len = Math.min(65535, raw.length - off);
+      z[p++] = bi === nBlk - 1 ? 1 : 0; z[p++] = len & 255; z[p++] = len >>> 8; z[p++] = ~len & 255; z[p++] = (~len >>> 8) & 255;
+      z.set(raw.subarray(off, off + len), p); p += len; off += len;
+    }
+    for (var i = 0; i < raw.length; i++) { s1 = (s1 + raw[i]) % 65521; s2 = (s2 + s1) % 65521; }
+    var ad = ((s2 << 16) | s1) >>> 0; z[p++] = ad >>> 24; z[p++] = (ad >>> 16) & 255; z[p++] = (ad >>> 8) & 255; z[p++] = ad & 255;
+    var chunks = [], total = 8;
+    var chunk = function (type, data) {
+      var c = new Uint8Array(12 + data.length), L = data.length;
+      c[0] = L >>> 24; c[1] = (L >>> 16) & 255; c[2] = (L >>> 8) & 255; c[3] = L & 255;
+      for (var t = 0; t < 4; t++) c[4 + t] = type.charCodeAt(t);
+      c.set(data, 8);
+      var cr = crc32(c, 4, 8 + L); c[8 + L] = cr >>> 24; c[9 + L] = (cr >>> 16) & 255; c[10 + L] = (cr >>> 8) & 255; c[11 + L] = cr & 255;
+      chunks.push(c); total += c.length;
+    };
+    var ih = new Uint8Array(13); ih[0] = W >>> 24; ih[1] = (W >>> 16) & 255; ih[2] = (W >>> 8) & 255; ih[3] = W & 255; ih.set(ih.subarray(0, 4), 4); ih[8] = 1; ih[9] = 0; ih[10] = 0; ih[11] = 0; ih[12] = 0;
+    chunk('IHDR', ih); chunk('IDAT', z); chunk('IEND', new Uint8Array(0));
+    var out = new Uint8Array(total); out.set([137, 80, 78, 71, 13, 10, 26, 10], 0);
+    var o = 8; chunks.forEach(function (c) { out.set(c, o); o += c.length; });
+    return out;
+  }
+  var api = { make: make, svg: svg, png: png, dataBytes: dataBytes, utf8: utf8, VMAX: VMAX };
+  if (typeof window !== 'undefined') window.O6QR = api;
+  return api;
+})();
+if (typeof module !== 'undefined' && module.exports) module.exports = O6QR;</script>
 <script>/* ระบบ 5 จัดทำคำสั่งราชการ — ตัวสร้างหน้าคำสั่ง A4 (หน้าเว็บ → พิมพ์/บันทึก PDF) และโครงร่วมที่ตัวสร้าง Word (order_docx.js) ใช้
    ต้นฉบับ: ระบบรับนักเรียน/_สำหรับพัฒนา/ระบบ5_คำสั่ง/src/order_render.js · รูปแบบอยู่ที่ order.css (ค่าระยะทั้งหมดอยู่ใน G ข้างล่างที่เดียว)
    ใช้: O5ORDER.render(host, data, order, opts) → สร้าง section.o5pg ทีละหน้าใน host
@@ -1045,7 +1266,10 @@ var O5ORDER = (function () {
     rule: 83,                                                     // เส้นจุดคั่นใต้หัว (จำนวนจุด เท่าหน้าประกาศระบบ 1)
     dateX: 31.5, spDate: 6, signX: 44, signW: 80, signGap: 4,     // ประกาศ ณ วันที่ เยื้อง 31.5 เว้นก่อน 6 pt · เว้น 4 บรรทัด ลงนามกึ่งกลางกล่อง 44–124 (cover.css)
     tdPad: 1.9, tdB: 0.5, numMin: 16, tbItem: 5, spTb: 6,         // ตาราง: ระยะในช่อง · เส้น 0.5 pt · ช่องตัวเลขกว้างอย่างน้อย 16 · แถวรายการเยื้องบรรทัดแรก 5 · เว้นหลังตาราง 6 pt
-    tight: 0.02                                                   // บีบช่องไฟดึงคำตกท้ายย่อหน้า (เท่ากับคำสั่ง)
+    tight: 0.02,                                                  // บีบช่องไฟดึงคำตกท้ายย่อหน้า (เท่ากับคำสั่ง)
+    // ห้องเรียนพิเศษ (ช่วง 6C · ตามร่าง ข): กำหนดการ ● ที่ระดับ 2 (20 มม.) ป้ายหลังจุด 5 มม. ข้อความคอลัมน์ที่ 60 มม. (ป้ายยาวกว่านั้น = เลื่อนทั้งชุด) · กล่อง เว้นก่อน/หลัง 6 pt
+    // · ฟอร์ม เว้นก่อนบรรทัด 3 pt (บรรทัดแรกของชุด 9 pt) คอลัมน์ที่ 2 ห่างข้อความยาวสุด 5 มม. ช่องกรอกแคบสุด 8 มม. · QR ขอบขาว 2 ช่อง
+    schDot: 5, schCol: 60, schGap: 3, spBox: 6, formSp: 3, formSp0: 9, formGap: 5, formMin: 8, qrQuiet: 2
   };
   GA.line = GA.fs * GA.lh * 25.4 / 72;
   GA.mt2 = GA.hdr + 2 * GA.line;                                  // หน้า 2+: เลขหน้า 1 บรรทัด + เว้น 1 บรรทัด (เนื้อความเริ่ม 25.1 มม. ≈ ร่าง ก 25.4)
@@ -1059,10 +1283,14 @@ var O5ORDER = (function () {
     return th ? s.replace(/[0-9]/g, function (d) { return THD.charAt(+d); }) : s.replace(/[๐-๙]/g, function (d) { return String(THD.indexOf(d)); });
   }
   /** ตัวหนาในข้อความ: **ข้อความ** → ตัวหนา (ใช้ทั้งหน้าเว็บและ Word) · plain = ตัดเครื่องหมายออก (ใช้กับคำต่อท้ายหน้า) */
-  function plain(t) { return String(t === null || t === undefined ? '' : t).replace(/\*\*/g, ''); }
-  function boldHtml(h) { return String(h).replace(/\*\*([^*]+?)\*\*/g, '<b>$1</b>'); }
+  // ดอกจันติดกัน 3 ตัวขึ้นไป (*** ข้อความ ***) = ดอกจันตามตัว ไม่ใช่เครื่องหมายตัวหนา (ประกาศห้องเรียนพิเศษ ช่วง 6C) · ข้อความที่ไม่มี *** ได้ผลเหมือนเดิมทุกตัวอักษร
+  var STAR3 = /\*{3,}/g, STARX = /\u0007/g;
+  function lit(t) { t = String(t); return t.indexOf('***') < 0 ? t : t.replace(STAR3, function (m) { return new Array(m.length + 1).join('\u0007'); }); }
+  function unlit(t) { return t.indexOf('\u0007') < 0 ? t : t.replace(STARX, '*'); }
+  function plain(t) { return unlit(lit(t === null || t === undefined ? '' : t).replace(/\*\*/g, '')); }
+  function boldHtml(h) { return unlit(lit(h).replace(/\*\*([^*]+?)\*\*/g, '<b>$1</b>')); }
   /** ข้อความ → [{ t, b }] แยกส่วนตัวหนา (ตามเครื่องหมาย **) · ใช้ในไฟล์ Word */
-  function boldParts(t) { var out = [], re = /\*\*([^*]+?)\*\*/g, m, p = 0; t = String(t); while ((m = re.exec(t))) { if (m.index > p) out.push({ t: t.slice(p, m.index), b: false }); out.push({ t: m[1], b: true }); p = m.index + m[0].length; } if (p < t.length || !out.length) out.push({ t: t.slice(p), b: false }); return out; }
+  function boldParts(t) { var out = [], re = /\*\*([^*]+?)\*\*/g, m, p = 0; t = lit(t); while ((m = re.exec(t))) { if (m.index > p) out.push({ t: unlit(t.slice(p, m.index)), b: false }); out.push({ t: unlit(m[1]), b: true }); p = m.index + m[0].length; } if (p < t.length || !out.length) out.push({ t: unlit(t.slice(p)), b: false }); return out; }
   function ymd(iso) { var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(iso || '')); if (!m) return null; var y = +m[1]; return { y: y < 2400 ? y + 543 : y, m: +m[2], d: +m[3] }; }
   /** 'YYYY-MM-DD' (ค.ศ. หรือ พ.ศ.) → '28 ตุลาคม พ.ศ. 2569' · ไม่ใช่วันที่ → ข้อความเดิม · bare = ไม่มีคำว่า พ.ศ. (วันที่ในตาราง: '8 กุมภาพันธ์ 2570') */
   function thaiDate(iso, bare) { var x = ymd(iso); return x && x.m >= 1 && x.m <= 12 ? x.d + ' ' + MONTHS[x.m - 1] + (bare ? ' ' : ' พ.ศ. ') + x.y : String(iso || ''); }
@@ -1471,13 +1699,13 @@ var O5ORDER = (function () {
   /** วลีห้ามฉีก (หน้าเว็บ · span.nb = white-space:nowrap ที่ DDNJUST ไม่ตัด) — ชุดเดียวกับไฟล์ Word (O5DOCX.glueAnn):
       วันที่เต็ม (วันที่ ๘ – ๑๒ กุมภาพันธ์ ๒๕๗๐ · ลงวันที่ ๒๘ สิงหาคม ๒๕๖๘) · พ.ศ./ปีการศึกษา/มาตรา/ข้อ/ที่ + ตัวเลข · ไม่ต่ำกว่า/ไม่น้อยกว่า/ไม่มากกว่า/ไม่เกิน + ตัวเลข (ไม่ต่ำกว่า ๒.๕๐) */
   var ANB = new RegExp('(?:(?:ลง)?วันที่\\s*)?[0-9๐-๙]{1,2}(?:\\s*[–—-]\\s*[0-9๐-๙]{1,2})?\\s*(?:' + MONTHS.join('|') + ')\\s*(?:พ\\.ศ\\.\\s*)?[0-9๐-๙]{4}' +
-    '|(?:พ\\.ศ\\.|ปีการศึกษา|มาตรา|ข้อ|ที่)\\s*[0-9๐-๙]+(?:\\.[0-9๐-๙]+)*|ไม่(?:ต่ำ|น้อย|มาก)กว่า\\s*[0-9๐-๙][0-9๐-๙.,]*|ไม่เกิน\\s*[0-9๐-๙][0-9๐-๙.,]*', 'g');
+    '|(?:พ\\.ศ\\.|ปีการศึกษา|มาตรา|ข้อ|ที่)\\s*[0-9๐-๙]+(?:\\.[0-9๐-๙]+)*|ไม่(?:ต่ำ|น้อย|มาก)กว่า\\s*[0-9๐-๙][0-9๐-๙.,]*|ไม่เกิน\\s*[0-9๐-๙][0-9๐-๙.,]*|เทียบเท่า', 'g');   // เทียบเท่า: ตัวตัดคำแยกเป็น เทียบ|เท่า (ช่วง 6C)
   function annText(t) { return boldHtml(esc(t).replace(ANB, '<span class="nb">$&</span>')).replace(/\n/g, '<br>'); }
   /** โครงประกาศเป็นรายการชิ้น (ใช้ร่วมหน้าเว็บและ Word) — ข้อความแปลงเลขไทย/อารบิกแล้ว */
   function annLayout(data, ann, opts) {
     opts = opts || {};
     var th = opts.digits !== 'ar', D = function (s) { return digits(s, th); };
-    var dt = ymd(opts.date), yr = String(opts.year || (dt ? dt.y : new Date().getFullYear() + 543));
+    var dt = ymd(opts.date), yr = String(opts.year || (dt ? dt.y : new Date().getFullYear() + 543)), ng = 0;   // ng = เลขชุดของกำหนดการ (บรรทัดในรายการเดียวกันอยู่หน้าเดียวกัน)
     var items = [{ k: 'acrest' }, { k: 'atitle', t: D('ประกาศ' + (data.school || 'โรงเรียนดัดดรุณี')) }];
     (ann.head && ann.head.length ? ann.head : ['']).forEach(function (s) { items.push({ k: 'asubj', t: D(s) }); });
     items.push({ k: 'arule', t: new Array(GA.rule + 1).join('.') });
@@ -1488,7 +1716,7 @@ var O5ORDER = (function () {
     (ann.blocks || []).forEach(function (b) {
       switch (b.k) {
         case 'p': items.push({ k: 'ap', x: lvX(b.lv), t: D(b.t), b: !!b.b, keep: !!b.keep, hang: !!b.hang }); break;
-        case 'note': (b.ps.length ? b.ps : ['']).forEach(function (x, i) { items.push({ k: 'anote', x: lvX(b.lv), label: D(b.label), first: !i, t: D(x), b: !!b.b }); }); break;
+        case 'note': (b.ps.length ? b.ps : ['']).forEach(function (x, i) { var it = { k: 'anote', x: lvX(b.lv), label: D(b.label), first: !i, t: D(x), b: !!b.b }; if (b.hang) it.hang = true; items.push(it); }); break;
         case 'tb': {                                                                       // ti = แถวรายการเยื้องบรรทัดแรก (เฉพาะตารางที่มีแถวกลุ่ม: รายการเป็นข้อย่อยของกลุ่ม)
           var hi = items.length, ti = b.rows.some(function (r) { return r.ty === 'g'; }), cell = function (c) { var o = {}; for (var q in c) o[q] = c[q]; o.t = D(c.t); return o; };
           items.push({ k: 'ath', n: b.n, w: b.w, ind: b.ind || 0, al: b.al, rows: b.head.map(function (r) { return r.map(cell); }) });
@@ -1498,12 +1726,21 @@ var O5ORDER = (function () {
         case 'pb': items.push({ k: 'apb' }); break;
         case 'ah': items.push({ k: 'aah', t: D(b.t), sz: b.sz || GA.fs }); break;
         case 'sig': sig(); break;
+        // ห้องเรียนพิเศษ (ช่วง 6C)
+        case 'sch': b.lines.forEach(function (ln, j) { items.push({ k: 'asch', first: !j, g: ng, bx: lvX(b.lv), dot: !!b.dot, lb: b.b !== false, col: b.col || 0, label: j ? '' : D(b.label || ''), t: D(ln) }); }); ng++; break;
+        case 'box': items.push({ k: 'abox', t: b.t.map(D), b: b.b !== false, sp: GA.spBox }); break;
+        case 'form': items.push({ k: 'aform', x: lvX(b.lv), t: D(b.t), col: b.col || 0 }); break;
+        case 'fsig': items.push({ k: 'afsig', lines: b.lines.map(D), ax: b.ax, sp: (b.gap || 0) * GA.fs * GA.lh }); break;
+        case 'qr': items.push({ k: 'aqr', key: b.key, url: opts.qr && opts.qr[b.key] !== undefined ? String(opts.qr[b.key]) : b.url || '', label: D(b.key), show: b.show !== false, sz: b.sz || 30, al: b.al || 'r', sp: (b.gap || 0) * GA.fs * GA.lh }); break;
+        case 'crest': items.push({ k: 'acrest2', sz: b.sz || GA.crest }); break;
       }
     });
     if (!ann.sig) sig();
     items.forEach(function (it, i) {
       var pv = items[i - 1];
       if (pv && pv.k === 'atr' && it.k !== 'ath' && it.k !== 'atr' && it.k !== 'apb' && !it.sp) it.sp = GA.spTb;   // เว้นหลังตาราง 6 pt
+      if (pv && pv.k === 'abox' && it.k !== 'apb' && !it.sp) it.sp = GA.spBox;                                // เว้นหลังกล่อง 6 pt
+      if (it.k === 'aform' && !it.sp) it.sp = pv && pv.k === 'aform' ? GA.formSp : GA.formSp0;                 // บรรทัดฟอร์มห่างกันพอเขียนด้วยมือ
       if (items[i + 1] && items[i + 1].k === 'adate') it.close = true;                                         // ชิ้นสุดท้ายก่อน "ประกาศ ณ วันที่"
     });
     return items;
@@ -1532,6 +1769,10 @@ var O5ORDER = (function () {
       if (it.k === 'anote') {
         if (it.first) lw = it.label ? mb(it.label + ' ') : 0;
         it.lw = lw;
+        if (it.hang) {                                                                     // หมายเหตุ แขวน=ใช่ (ช่วง 6C): ข้อที่ขึ้นต้นด้วยเลข → บรรทัดต่อตรงข้อความหลังเลข
+          var nlead = /^\*\*/.test(it.t) ? '**' : '', nbody = nlead ? it.t.slice(2) : it.t, nm = NUMP.exec(nbody);
+          if (nm) { it.num = nm[1]; it.nb = !!(it.b || nlead); it.rest = nlead + nbody.slice(nm[0].length); it.nw = (it.nb ? mb : mw)(it.num + ' '); }
+        }
       }
       if (it.k === 'ath') {
         var n = it.n, need = [], q, rows = [];
@@ -1551,6 +1792,102 @@ var O5ORDER = (function () {
         var rest = 0; for (q = 1; q < n; q++) rest += need[q];
         need[0] = GA.tw - (it.ind || 0) - rest;
         it.w = need; rows.forEach(function (r) { r.w = need; });
+      }
+    });
+    annPrep6C(items, mw, mb);
+  }
+  /** ห้องเรียนพิเศษ (ช่วง 6C) — วัดตำแหน่งที่หน้าเว็บและ Word ใช้ร่วมกัน (มม. จากขอบซ้ายของเนื้อความ):
+      กำหนดการ: it.lx ป้าย · it.cx คอลัมน์ข้อความ (ชุดที่ติดกันใช้ค่าเดียว) · บรรทัดต่อที่ขึ้นต้นด้วยเลข = แขวน (it.num it.nw it.rest)
+      ฟอร์ม: it.parts = [{ t, x, w } ข้อความ · { f, x, w, dots, ls } ช่องกรอก · { col, x } จุดเริ่มคอลัมน์ที่ 2] (x จาก it.x) · ช่องกรอกแบ่งที่ว่างตามจำนวนจุดที่พิมพ์
+      ลงชื่อฟอร์ม: it.lns = [{ x, pre, dots, suf, fx, fw } บรรทัดลงชื่อ (จุดกึ่งกลางที่แกน) · { x, t, w } บรรทัดกึ่งกลางที่แกน] · QR: it.qr (ตาราง QR · ไม่มีลิงก์/ยาวเกิน = null + it.qrErr)
+      ข้อสังเกตตอนจัดหน้า (ไม่พิมพ์) → items.lw */
+  var FIELD = /(\.{3,}|…+)/;
+  function annPrep6C(items, mw, mb) {
+    var lw = items.lw = [], wb = function (t) { return boldParts(t).reduce(function (a, p) { return a + (p.b ? mb : mw)(p.t); }, 0); };
+    var dotW = mw('.'), run = [], hangW = 0;
+    var fin = function () {                                                                // กำหนดการชุดเดียวกัน: คอลัมน์ข้อความ = ค่าตั้ง (60) หรือป้ายยาวสุด + ช่องว่าง
+      if (!run.length) return;
+      var cx = 0;
+      run.forEach(function (it) { if (it.first) cx = Math.max(cx, it.col || GA.schCol, it.lx + (it.label ? (it.lb ? mb : wb)(plain(it.label)) + GA.schGap : 0)); });
+      run.forEach(function (it) { it.cx = cx; if (cx + 20 > GA.tw) lw.push('กำหนดการ "' + plain(it.label || it.t).slice(0, 20) + '": คอลัมน์ข้อความเริ่มที่ ' + cx.toFixed(1) + ' มม. เหลือที่น้อยเกินไป'); });
+      run = [];
+    };
+    items.forEach(function (it, i) {
+      if (it.k === 'asch') {
+        if (it.first && run.length && items[i - 1].k !== 'asch') fin();
+        it.lx = it.bx + (it.dot ? GA.schDot : 0);
+        if (it.first) hangW = 0;
+        else {                                                                             // บรรทัดต่อ: ขึ้นต้นด้วยเลข = ข้อย่อยแขวน · บรรทัดถัดจากข้อย่อยที่ไม่มีเลข = บรรทัดต่อของข้อนั้น (เยื้องตรงข้อความหลังเลข)
+          var lead = /^\*\*/.test(it.t) ? '**' : '', body = lead ? it.t.slice(2) : it.t, m = NUMP.exec(body);
+          if (m) { it.num = m[1]; it.rest = lead + body.slice(m[0].length); it.nw = hangW = mw(it.num + ' '); }
+          else if (hangW) { it.cont = true; it.nw = hangW; }
+        }
+        run.push(it); return;
+      }
+      fin();
+    });
+    fin();
+    // ฟอร์ม: คอลัมน์ที่ 2 ของบรรทัดที่ติดกันตรงกัน
+    var fr = [], ffin = function () {
+      if (!fr.length) return;
+      var cx = 0;
+      fr.forEach(function (it) { if (it.c1 !== undefined) cx = Math.max(cx, it.col || 0, it.x + it.c1 + GA.formGap); });
+      fr.forEach(function (it) { formParts(it, cx - it.x); });
+      fr = [];
+    };
+    var formParts = function (it, c2) {
+      var parts = [], x0 = it.num ? it.nw : 0, segs = it.body.split('|');
+      if (segs.length > 2) segs = [segs[0], segs.slice(1).join('|')];
+      var seg = function (str, xs, xe) {                                                  // ข้อความ + ช่องกรอกในช่วง xs–xe (ช่องกรอกแบ่งที่ว่างตามจำนวนจุด)
+        var ps = str.split(FIELD), fixed = 0, dots = 0;
+        ps.forEach(function (q, j) { if (j % 2) dots += q.replace(/…/g, '...').length; else fixed += wb(q); });
+        var free = xe - xs - fixed, x = xs, nf = Math.floor(ps.length / 2);
+        if (nf && free < nf * GA.formMin - 0.01) lw.push('ฟอร์ม "' + plain(it.t).slice(0, 24) + '…": ช่องกรอกแคบเกินไป (เหลือ ' + Math.max(0, free).toFixed(1) + ' มม.) — ตัดข้อความให้สั้นลงหรือแยกเป็น 2 บรรทัด');
+        if (!nf && xe < 1e8 && fixed > xe - xs + 0.5) lw.push('ฟอร์ม "' + plain(it.t).slice(0, 24) + '…": ข้อความยาวเกินบรรทัด');
+        ps.forEach(function (q, j) {
+          if (j % 2) {
+            var w = Math.max(dots ? Math.max(0, free) * q.replace(/…/g, '...').length / dots : 0, 0), n = Math.max(1, Math.floor(w / dotW + 1e-6));
+            parts.push({ f: true, x: x, w: w, dots: new Array(n + 1).join('.'), ls: w > dotW ? (w - n * dotW) / n : 0, end: j === ps.length - 2 && xe >= GA.tw - it.x - 0.01 }); x += w;
+          } else if (q) { var ww = wb(q); parts.push({ t: q, x: x, w: ww }); x += ww; }
+        });
+        return x;
+      };
+      var right = GA.tw - it.x;
+      if (segs.length === 2) {
+        seg(segs[0], x0, FIELD.test(segs[0]) ? c2 - GA.formGap : 1e9);
+        parts.push({ col: true, x: c2 });
+        seg(segs[1], c2, right);
+      } else seg(segs[0], x0, right);
+      it.parts = parts;
+    };
+    items.forEach(function (it) {
+      if (it.k !== 'aform') { ffin(); return; }
+      var m = NUMP.exec(it.t);
+      it.body = m ? it.t.slice(m[0].length) : it.t;
+      if (m) { it.num = m[1]; it.nw = mw(it.num + ' '); }
+      var bar = it.body.indexOf('|');
+      if (bar >= 0) it.c1 = (it.num ? it.nw : 0) + wb(it.body.slice(0, bar).replace(FIELD, ''));
+      fr.push(it);
+    });
+    ffin();
+    items.forEach(function (it) {
+      if (it.k === 'afsig') {                                                             // ลงชื่อฟอร์ม: แกนกึ่งกลาง = กลางเนื้อความ (หรือ กึ่งกลาง=มม.)
+        var ax = it.ax != null ? it.ax : GA.tw / 2;
+        it.lns = it.lines.map(function (ln, j) {
+          var m = !j && /^(.*?)(\.{3,}|…+)(.*)$/.exec(ln);
+          if (m) {
+            var fw = mw(m[2]), pw = wb(m[1]), fx = ax - fw / 2, sw = wb(m[3]), over = Math.max(0, fx + fw + sw - GA.tw), under = Math.max(0, pw - fx);
+            if (over || under) { fx += under - over; lw.push('ลงชื่อฟอร์ม "' + plain(ln).slice(0, 20) + '…": ยาวเกินแกนกึ่งกลาง เลื่อนให้อยู่ในขอบ'); }
+            return { x: fx - pw, pre: m[1], dots: m[2], suf: m[3], fx: fx, fw: fw };
+          }
+          var w = wb(ln); return { x: Math.max(0, Math.min(GA.tw - w, ax - w / 2)), t: ln, w: w };
+        });
+      }
+      if (it.k === 'aqr') {
+        it.qr = null; it.qrErr = '';
+        if (!it.url) it.qrErr = 'ยังไม่มีลิงก์';
+        else if (typeof O6QR === 'undefined') it.qrErr = 'หน้านี้ไม่มีตัวสร้าง QR';
+        else { try { it.qr = O6QR.make(it.url, 'M'); } catch (e) { it.qrErr = e.message; lw.push('QR "' + it.key + '": ' + e.message); } }
       }
     });
   }
@@ -1574,6 +1911,7 @@ var O5ORDER = (function () {
         if (it.num) return '<p class="o6-p tj' + (it.b ? ' o5-b' : '') + '" style="' + sp + 'padding-left:' + mm(it.x + it.nw) + ';text-indent:' + mm(-it.nw) + '"' + ATIGHT + br(it.t) + '><span class="o5-nn' + (it.nb ? ' o5-b' : '') + '">' + esc(it.num) + ' </span>' + annText(it.rest) + '</p>';
         return '<p class="o6-p tj' + (it.b ? ' o5-b' : '') + '" style="' + sp + 'text-indent:' + mm(it.x) + '"' + ATIGHT + br(it.t) + '>' + annText(it.t) + '</p>';
       case 'anote':
+        if (it.num) return '<p class="o6-p o6-note tj' + (it.b ? ' o5-b' : '') + '" style="' + sp + 'padding-left:' + mm(it.x + it.lw + it.nw) + ';text-indent:' + mm(-it.nw) + ';--lx:' + mm(it.x) + '"' + (it.first && it.label ? ' data-label="' + esc(it.label) + '"' : '') + ATIGHT + br(it.t) + '><span class="o5-nn' + (it.nb ? ' o5-b' : '') + '">' + esc(it.num) + ' </span>' + annText(it.rest) + '</p>';
         return '<p class="o6-p o6-note tj' + (it.b ? ' o5-b' : '') + '" style="' + sp + 'padding-left:' + mm(it.x + it.lw) + ';--lx:' + mm(it.x) + '"' + (it.first && it.label ? ' data-label="' + esc(it.label) + '"' : '') + ATIGHT + br(it.t) + '>' + annText(it.t) + '</p>';
       case 'ath':
         return '<div class="o5-tr o5-th o6-tb" style="grid-template-columns:' + it.w.map(mm).join(' ') + ';width:' + mm(it.w.reduce(function (a, b) { return a + b; }, 0)) + (it.ind ? ';margin-left:' + mm(it.ind) : '') + '">' +
@@ -1591,13 +1929,39 @@ var O5ORDER = (function () {
       case 'aah': return '<div class="o5-c o5-b" style="' + sp + (it.sz !== GA.fs ? 'font-size:' + it.sz + 'pt' : '') + '">' + esc(it.t) + '</div>';
       case 'adate': return '<div class="o6-date" style="' + sp + '">' + esc(it.t) + '</div>';
       case 'asign': return '<div class="o6-sign"><div>' + esc(it.name) + '</div><div>' + esc(it.pos) + '</div></div>';
+      // ห้องเรียนพิเศษ (ช่วง 6C)
+      case 'asch': {                                                                       // ป้าย = ::before ที่ --lx · จุด ● = ::after (วาดด้วยเส้นขอบ พิมพ์ออกเสมอ) · ข้อความเริ่มที่คอลัมน์ cx
+        var pl = it.cx + (it.num || it.cont ? it.nw : 0), first = it.first && (it.label || it.dot);
+        return '<p class="o6-p o6-sch tj' + (it.first && it.dot ? ' o6-dot' : '') + (it.first && it.label && !it.lb ? ' o6-ln' : '') + '" style="' + sp + 'padding-left:' + mm(pl) + (it.num ? ';text-indent:' + mm(-it.nw) : '') + (first ? ';--bx:' + mm(it.bx) + ';--lx:' + mm(it.lx) : '') + '"' +
+          (it.first && it.label ? ' data-label="' + esc(plain(it.label)) + '"' : '') + ATIGHT + '>' + (it.num ? '<span class="o5-nn">' + esc(it.num) + ' </span>' + annText(it.rest) : it.t ? annText(it.t) : '&#8203;') + '</p>';
+      }
+      case 'abox': return '<div class="o6-box' + (it.b ? ' o5-b' : '') + '" style="' + sp + '">' + it.t.map(annText).join('<br>') + '</div>';
+      case 'aform': {
+        var fh = it.num ? '<span class="o6-fp">' + esc(it.num) + '</span>' : '';
+        it.parts.forEach(function (q) {
+          if (q.col) return;
+          fh += q.f ? '<span class="o6-fp o6-fd" style="left:' + mm(q.x) + ';width:' + mm(q.w) + ';letter-spacing:' + mm(q.ls) + '">' + q.dots + '</span>' : '<span class="o6-fp" style="left:' + mm(q.x) + '">' + boldHtml(esc(q.t)) + '</span>';
+        });
+        return '<div class="o6-form" style="' + sp + 'margin-left:' + mm(it.x) + '">' + fh + '</div>';
+      }
+      case 'afsig': return '<div class="o6-fsig" style="' + sp + '">' + it.lns.map(function (l) { return '<div style="padding-left:' + mm(l.x) + '">' + (l.dots ? boldHtml(esc(l.pre)) + l.dots + boldHtml(esc(l.suf)) : boldHtml(esc(l.t))) + '</div>'; }).join('') + '</div>';
+      case 'aqr': {
+        var qx = it.al === 'l' ? 0 : it.al === 'c' ? (GA.tw - it.sz) / 2 : GA.tw - it.sz;
+        return '<div class="o6-qr" style="' + sp + 'margin-left:' + mm(qx) + ';width:' + mm(it.sz) + '"><div class="o6-qri" style="height:' + mm(it.sz) + '">' +
+          (it.qr ? O6QR.svg(it.qr, GA.qrQuiet) : '<div class="o6-qr0">ยังไม่มี<br>ลิงก์ QR</div>') + '</div>' + (it.show && it.label ? '<div class="o6-qrl">' + esc(it.label) + '</div>' : '') + '</div>';
+      }
+      case 'acrest2': return '<div class="o6-crest" style="height:' + mm(it.sz) + '">' + (opts.crest ? '<img alt="" src="' + esc(opts.crest) + '" style="height:' + mm(it.sz) + '">' : '') + '</div>';
     }
     return '';
   }
   /** คำต่อท้ายหน้าของประกาศ: /๕.๓ วัน... · /๒.๒ ค่าสอน... (แถวตาราง) · /ประกาศแนบท้าย... · บรรทัดกลางย่อหน้า = คำแรกของบรรทัดนั้น */
   function contAnn(a) {
     var it = a.it, t;
-    if (it.k === 'atr') t = it.cells[0];
+    if (it.k === 'asch' && it.first && it.label && a.line <= 0) return '/' + plain(it.label) + '...';
+    if (it.k === 'aqr') return '/' + (it.label || 'QR') + '...';
+    if (it.k === 'abox' || it.k === 'afsig') t = (it.t || it.lines || [''])[0];
+    else if (it.k === 'aform') t = (it.num ? it.num + ' ' : '') + it.body;
+    else if (it.k === 'atr') t = it.cells[0];
     else if (it.k === 'ath') t = it.rows[0] && it.rows[0][0] ? it.rows[0][0].t : '';
     else if (a.line > 0) t = a.text;
     else t = (it.k === 'anote' && it.first && it.label ? it.label + ' ' : '') + (it.t || it.name || '');
@@ -1614,7 +1978,7 @@ var O5ORDER = (function () {
     var flow = doc.createElement('div');
     flow.className = 'o5pg o6pg o5-flow';
     flow.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;height:auto;padding:0;width:' + mm(GA.tw);
-    host.appendChild(flow);
+    doc.body.appendChild(flow);                                                           // วัดนอกกล่องตัวอย่าง (ไม่โดน CSS zoom ของหน้าเว็บ) → แบ่งหน้าเหมือนตอนพิมพ์ (ซูม 100%) ทุกขนาดจอ
     var Z = flow.getBoundingClientRect().width / (GA.tw * MM) || 1;
     annPrep(items, annMeasure(doc, false), annMeasure(doc, true));
     flow.innerHTML = items.map(function (it) { return annHtml(it, opts); }).join('');
@@ -1634,14 +1998,20 @@ var O5ORDER = (function () {
         });
       } else atoms.push({ it: it, el: e, line: -1, sp: spm, h: e.getBoundingClientRect().height / MM / Z + spm, glue: false });
     });
+    // ตารางสั้น (หัว + ทุกแถว สูงไม่เกินครึ่งหน้า) ไม่แบ่งข้ามหน้า — ไม่ให้เหลือ 1–2 แถวพร้อมหัวตารางซ้ำบนหน้าถัดไป (ช่วง 6C · ตารางยาวแบ่งได้ตามเดิม) · it.tk = Word ใส่ keepNext ให้แถวนั้น
+    var tbH = {}, half = (GA.H - GA.mt2 - GA.mb - GA.line - 0.5) / 2;
+    atoms.forEach(function (a) { var k = a.it.k; if (k === 'ath') tbH[items.indexOf(a.it)] = (tbH[items.indexOf(a.it)] || 0) + a.h; else if (k === 'atr') tbH[a.it.th] = (tbH[a.it.th] || 0) + a.h; });
     atoms.forEach(function (a, i) {
       var k = a.it.k, nx = atoms[i + 1];
-      if (k === 'acrest' || k === 'atitle' || k === 'asubj' || k === 'arule' || k === 'ath' || k === 'aah' || k === 'adate' || a.it.keep) a.glue = true;
+      if (k === 'atr' && nx && nx.it.k === 'atr' && nx.it.th === a.it.th && tbH[a.it.th] <= half) { a.glue = true; a.it.tk = true; }
+      if (k === 'acrest' || k === 'atitle' || k === 'asubj' || k === 'arule' || k === 'ath' || k === 'aah' || k === 'adate' || k === 'acrest2' || a.it.keep) a.glue = true;
+      if (k === 'asch' && (a.line >= 0 && a.line < a.n - 1 || nx && (nx.it.k === 'asch' || nx.it.k === 'abox'))) a.glue = true;   // กำหนดการทั้งชุด (+ กล่องที่ตามมา) อยู่หน้าเดียวกัน (ยาวเกินหน้า = แบ่งเท่าที่ใส่ได้)
       if (k === 'atr' && a.it.ty === 'g') a.glue = true;                                   // แถวกลุ่ม (๑. ค่าใช้จ่าย…) ติดกับแถวรายการแรก
       if (a.it.close && (a.line === -1 || a.line >= a.n - 2)) a.glue = true;               // 2 บรรทัดท้ายก่อน "ประกาศ ณ วันที่" อยู่หน้าเดียวกับวันที่และลงนาม
       if (!nx || nx.brk) a.glue = false;
     });
-    var cap = function (p) { return GA.H - (p ? GA.mt2 : GA.mt) - GA.mb - GA.line - 0.5; };   // สงวน 1 บรรทัดล่างไว้ให้คำต่อท้ายหน้า (+ เผื่อปัดเศษ 0.5 มม.)
+    var solo = [];                                                                        // หน้าแนบที่ขึ้นด้วยครุฑ (หน้าใหม่ + ครุฑ): ไม่มีเลขหน้า เนื้อความเริ่มที่ขอบบนเหมือนหน้าแรก
+    var cap = function (p) { return GA.H - (p && !solo[p] ? GA.mt2 : GA.mt) - GA.mb - GA.line - 0.5; };   // สงวน 1 บรรทัดล่างไว้ให้คำต่อท้ายหน้า (+ เผื่อปัดเศษ 0.5 มม.)
     var thH = {};
     items.forEach(function (it, i) { if (it.k === 'ath') thH[i] = els[i].getBoundingClientRect().height / MM / Z; });
     var rep = function (a) { return a && a.it.k === 'atr' ? thH[a.it.th] || 0 : 0; };
@@ -1649,14 +2019,16 @@ var O5ORDER = (function () {
     var pages = [[]], used = 0, i0 = 0;
     while (i0 < atoms.length) {
       var pg = pages[pages.length - 1];
-      if (atoms[i0].brk) { if (pg.length) { pages.push([]); used = 0; } i0++; continue; }   // หน้าใหม่ (หน้าว่างอยู่แล้ว = ไม่ต้องขึ้นซ้ำ)
+      if (atoms[i0].brk) { if (pg.length) { pages.push([]); used = 0; } i0++; if (atoms[i0] && atoms[i0].it.k === 'acrest2') solo[pages.length - 1] = true; continue; }   // หน้าใหม่ (หน้าว่างอยู่แล้ว = ไม่ต้องขึ้นซ้ำ) · ตามด้วยครุฑ = หน้าแนบเดี่ยว
       var j = i0, h = atoms[i0].h;
       while (atoms[j].glue && j + 1 < atoms.length && !atoms[j + 1].brk) { j++; h += atoms[j].h; }
+      // กลุ่มที่จบหน้าโดยไม่มีคำต่อท้ายหน้า (จบด้วยลงนาม · ท้ายเอกสาร · ก่อนหน้าแนบที่ขึ้นด้วยครุฑ) ใช้บรรทัดที่สงวนไว้ให้คำต่อท้ายหน้าได้
+      var nc = atoms[j].it.k === 'asign' || j + 1 >= atoms.length || atoms[j + 1].brk && atoms[j + 2] && atoms[j + 2].it.k === 'acrest2', ex = nc ? GA.line : 0;
       var avail = cap(pages.length - 1) - used, h0 = h - (pg.length ? 0 : top(atoms[i0]));
-      if (h0 <= avail + 0.01) {
+      if (h0 <= avail + ex + 0.01) {
         for (var k = i0; k <= j; k++) pg.push(atoms[k]);
         used += h0; i0 = j + 1;
-      } else if (pg.length && h - top(atoms[i0]) + rep(atoms[i0]) <= cap(1) + 0.01) {
+      } else if (pg.length && h - top(atoms[i0]) + rep(atoms[i0]) <= cap(1) + ex + 0.01) {
         pages.push([]); used = rep(atoms[i0]);
       } else {                                                                            // กลุ่มสูงเกินหน้า (หรือหน้าว่างแล้วยังไม่พอ): ใส่เท่าที่ได้
         var put = 0;
@@ -1672,8 +2044,8 @@ var O5ORDER = (function () {
     while (pages.length > 1 && !pages[pages.length - 1].length) pages.pop();
     var out = pages.map(function (pg, p) {
       var sec = doc.createElement('section');
-      sec.className = 'o5pg o6pg' + (p ? ' o5-p2' : '');
-      if (p) { var pn = doc.createElement('div'); pn.className = 'o5-pn'; pn.textContent = '- ' + digits(p + 1, opts.digits !== 'ar') + ' -'; sec.appendChild(pn); }
+      sec.className = 'o5pg o6pg' + (p && !solo[p] ? ' o5-p2' : '');
+      if (p && !solo[p]) { var pn = doc.createElement('div'); pn.className = 'o5-pn'; pn.textContent = '- ' + digits(p + 1, opts.digits !== 'ar') + ' -'; sec.appendChild(pn); }
       var body = doc.createElement('div'); body.className = 'o5-body'; sec.appendChild(body);
       var cur = null, curEl = null;
       pg.forEach(function (a) {
@@ -1682,7 +2054,7 @@ var O5ORDER = (function () {
         if (a.line < 0) { body.appendChild(a.el); if (a.sp && top0) a.el.style.marginTop = '0'; cur = null; return; }
         if (curEl !== a.el || !cur) {
           cur = a.el.cloneNode(false);
-          if (a.line > 0) { cur.style.marginTop = ''; cur.removeAttribute('data-label'); if (a.it.num) { cur.style.textIndent = '0'; } } else if (a.sp && top0) cur.style.marginTop = '0';
+          if (a.line > 0) { cur.style.marginTop = ''; cur.removeAttribute('data-label'); cur.classList.remove('o6-dot'); if (a.it.num) { cur.style.textIndent = '0'; } } else if (a.sp && top0) cur.style.marginTop = '0';
           body.appendChild(cur); curEl = a.el;
         }
         cur.appendChild(a.ln);
@@ -1692,15 +2064,15 @@ var O5ORDER = (function () {
     });
     out.forEach(function (sec, p) {
       var last = pages[p][pages[p].length - 1];
-      if (p < out.length - 1 && !(last && last.it.k === 'asign')) { var c = doc.createElement('div'); c.className = 'o5-cont'; c.textContent = contAnn(pages[p + 1][0]); sec.appendChild(c); }
+      if (p < out.length - 1 && !(last && last.it.k === 'asign') && !solo[p + 1]) { var c = doc.createElement('div'); c.className = 'o5-cont'; c.textContent = contAnn(pages[p + 1][0]); sec.appendChild(c); }
       host.appendChild(sec);
     });
-    host.removeChild(flow);
-    return { pages: out, items: items, atoms: atoms, plan: pages };
+    if (flow.parentNode) flow.parentNode.removeChild(flow);
+    return { pages: out, items: items, atoms: atoms, plan: pages, solo: solo.slice(), lw: (items.lw || []).slice() };
   }
 
   var api = { G: G, plain: plain, boldParts: boldParts, sbcols: sbcols, digits: digits, thaiDate: thaiDate, tcols: tcols, ncol: ncol, tabcols: tabcols, labcols: labcols, layout: layout, columns: columns, render: render, measurer: measurer, contOf: contOf, MM: MM,
-              GA: GA, annLayout: annLayout, annPrep: annPrep, renderAnn: renderAnn, contAnn: contAnn };
+              GA: GA, annLayout: annLayout, annPrep: annPrep, renderAnn: renderAnn, contAnn: contAnn, NUMP: NUMP };
   if (typeof window !== 'undefined') window.O5ORDER = api;
   return api;
 })();
@@ -1883,13 +2255,15 @@ var O5DOCX = (function () {
      items = ผลของ O5ORDER.renderAnn (วัดแล้ว: ความกว้างตาราง it.w · ป้ายหมายเหตุ it.lw · เลขข้อแขวน it.nw · ช่องไฟที่บีบ it.tight) → ขอบ ระยะ คอลัมน์ตาราง ตรงกับหน้าเว็บ
      Word จัดหน้าเอง: หัวข้อ/หัวแนบ/หัวตาราง keepNext · ย่อหน้า widowControl · 2 บรรทัดท้ายก่อนวันที่ + วันที่ + ลงนาม อยู่ด้วยกัน · หน้าใหม่ = pageBreakBefore
      · ตาราง: แถวหัวพิมพ์ซ้ำทุกหน้า (tblHeader) · แถวไม่แยกหน้า (cantSplit) · รวมเซลล์ gridSpan/vMerge · ไม่มีคำต่อท้ายหน้า (เหมือนไฟล์ Word ของคำสั่ง)
-     · เลขหน้า "- ๒ -" หัวกระดาษตั้งแต่หน้า 2: หัวกระดาษเริ่ม 6.2 มม. [บรรทัดว่าง · เลขหน้า · บรรทัดว่าง] → เลขหน้าที่ 12.5 เนื้อความหน้า 2+ เริ่ม 25.1 · หน้าแรกเริ่ม 12.5 (ครุฑ) */
+     · เลขหน้า "- ๒ -" หัวกระดาษตั้งแต่หน้า 2: หัวกระดาษเริ่ม 6.2 มม. [บรรทัดว่าง · เลขหน้า · บรรทัดว่าง] → เลขหน้าที่ 12.5 เนื้อความหน้า 2+ เริ่ม 25.1 · หน้าแรกเริ่ม 12.5 (ครุฑ)
+     · ห้องเรียนพิเศษ (ช่วง 6C): กำหนดการ = แท็บ (● → ป้าย → คอลัมน์ข้อความ) แขวนบรรทัดต่อ · กล่อง = ตาราง 1 ช่อง · ฟอร์ม = แท็บมีเส้นนำจุด (ช่องกรอกยืด/หดเองใน Word)
+       · ลงชื่อฟอร์ม = แท็บขวา + แท็บจุด · QR = รูป PNG ขาวดำ (O6QR.png) · หน้าแนบที่ขึ้นด้วยครุฑ = ตัวแบ่งส่วน (section) ใหม่ หน้าแรกของส่วนไม่มีเลขหน้า (เหมือนหน้าเว็บ) */
   /** วลีห้ามฉีกของประกาศ = ของคำสั่ง (glue) + ไม่ต่ำกว่า/ไม่น้อยกว่า/ไม่มากกว่า/ไม่เกิน + ตัวเลข + ลงวันที่ (ตรงกับ span.nb ของหน้าเว็บ · คำสั่งไม่เปลี่ยน) */
-  var RX_AMT = /ไม่(?:ต่ำ|น้อย|มาก)กว่า\s*[๐-๙0-9][๐-๙0-9.,]*|ไม่เกิน\s*[๐-๙0-9][๐-๙0-9.,]*|ลงวันที่/g;
+  var RX_AMT = /ไม่(?:ต่ำ|น้อย|มาก)กว่า\s*[๐-๙0-9][๐-๙0-9.,]*|ไม่เกิน\s*[๐-๙0-9][๐-๙0-9.,]*|ลงวันที่|เทียบเท่า/g;      // เทียบเท่า = ช่วง 6C (ตรงกับ ANB ของหน้าเว็บ)
   function glueAnn(t) { return glue(String(t).replace(RX_AMT, function (m) { return DDNDOCX.glue(m, true); })); }
   function annModel(items, opts) {
     opts = opts || {};
-    var A = O5ORDER.GA, out = [], title = '', pbb = false, glue = glueAnn;
+    var A = O5ORDER.GA, out = [], title = '', pbb = false, glue = glueAnn, sectNext = false;
     var bold = function (rs, on) { if (on) rs.forEach(function (r) { r.b = true; }); return rs; };
     var push = function (p) { if (pbb && !p.tbl) { p.pageBreakBefore = true; pbb = false; } else if (pbb) { out.push(P({ pageBreakBefore: true, runs: [] })); pbb = false; } out.push(p); };
     var cellPs = function (t, o) { return String(t).split('\n').map(function (x) { return P(Object.assign({ runs: bold(RR(glue(x), null), o.b) }, o.p || {})); }); };
@@ -1916,6 +2290,16 @@ var O5DOCX = (function () {
           break;
         }
         case 'anote': {                                             // หมายเหตุ: ป้ายตัวหนา → TAB → ข้อความ · บรรทัดต่อ/ข้อถัดไปแขวนตรงข้อความหลังป้าย
+          if (it.num) {                                             // แขวน=ใช่ + ข้อมีเลข: [ป้าย → TAB] → เลข → TAB → ข้อความ · บรรทัดต่อตรงข้อความหลังเลข
+            var nl2 = tw(it.x + it.lw), nt = tw(it.x + it.lw + it.nw), nsg = String(it.rest).split('\n'), lab = it.first && it.label;
+            nsg.forEach(function (seg, si) {
+              var runs = bold(RR(glue(seg), it), it.b);
+              if (!si) runs = (lab ? [R(glue(it.label), true), TAB] : []).concat([R(it.num, it.nb), TAB], runs);
+              push(P({ jc: 'thaiDistribute', before: si ? 0 : before, widow: true, left: nt, hang: si ? 0 : nt - (lab ? tw(it.x) : nl2), tabs: si ? [] : (lab ? [{ pos: nl2 }] : []).concat([{ pos: nt }]),
+                       keepNext: it.close && nx.k === 'adate' || si < nsg.length - 1, keepLines: it.close && nx.k === 'adate' || nsg.length > 1, runs: runs }));
+            });
+            break;
+          }
           var nl = tw(it.x + it.lw), nsegs = String(it.t).split('\n');
           nsegs.forEach(function (seg, si) {
             var runs = bold(RR(glue(seg), it), it.b);
@@ -1947,7 +2331,7 @@ var O5DOCX = (function () {
         }
         case 'atr': {
           if (!tb) { tb = { widths: it.w.map(tw), ind: it.ind ? tw(it.ind) : 0, pad: tw(A.tdPad), border: Math.round(A.tdB * 8), rows: [] }; push({ tbl: tb }); }
-          var jc = it.al === 'r' ? 'right' : it.al === 'l' ? 'left' : 'center', keep = it.ty === 'g' || it.close && nx.k === 'adate';
+          var jc = it.al === 'r' ? 'right' : it.al === 'l' ? 'left' : 'center', keep = it.ty === 'g' || it.close && nx.k === 'adate' || !!it.tk;   // it.tk = ตารางสั้นไม่แบ่งหน้า (หน้าเว็บกำหนด)
           if (it.ty === 'g') { var gp = cellPs(it.cells[0], { b: true, p: { keepNext: true } }); gp.span = it.n; tb.rows.push({ cells: [gp] }); break; }
           tb.rows.push({ cells: it.cells.map(function (c, ci) {          // ช่องรายการ: บรรทัดแรกเยื้อง (ตารางที่มีแถวกลุ่ม) · บรรทัด "- …" ที่ขึ้นใหม่ = ข้อย่อยเยื้องทั้งบรรทัด (เหมือนหน้าเว็บ)
             if (!ci) return it.ty === 'i' ? String(c).split('\n').map(function (x, xi) { return P({ first: !xi && it.ti ? tw(A.tbItem) : 0, left: xi && /^[-–•]\s/.test(x) ? tw(A.tbItem) : 0, keepNext: keep, runs: RR(glue(x), null) }); })
@@ -1956,7 +2340,61 @@ var O5DOCX = (function () {
           }) });
           break;
         }
-        case 'apb': pbb = true; break;
+        case 'apb': if (nx.k === 'acrest2') sectNext = true; else pbb = true; break;     // หน้าใหม่ + ครุฑ = ส่วนใหม่ (หน้าแนบไม่มีเลขหน้า)
+        // ---- ห้องเรียนพิเศษ (ช่วง 6C) ----
+        case 'asch': {                                              // กำหนดการ: [• → TAB] → ป้าย → TAB → ข้อความที่คอลัมน์ cx · บรรทัดต่อ/ข้อมีเลข แขวนใต้คอลัมน์ · ทั้งรายการไม่แยกหน้า
+          var cxw = tw(it.cx), base = { jc: 'thaiDistribute', before: before, widow: true, keepNext: nx.k === 'asch' || nx.k === 'abox' || it.close && nx.k === 'adate', keepLines: true };   // ทั้งชุด + กล่องที่ตามมา อยู่หน้าเดียวกัน
+          if (it.first) {
+            var sr = [], st = [];
+            if (it.dot) { sr.push(R('\u2022'), TAB); st.push({ pos: tw(it.lx) }); }
+            if (it.label) sr = sr.concat(bold(RR(glue(it.label), null), it.lb));
+            sr.push(TAB); st.push({ pos: cxw });
+            push(P(Object.assign(base, { left: cxw, hang: cxw - tw(it.dot ? it.bx : it.lx), tabs: st, runs: sr.concat(RR(glue(it.t), it)) })));
+          } else if (it.num) {
+            var lead2 = tw(it.cx + it.nw);
+            push(P(Object.assign(base, { left: lead2, hang: lead2 - cxw, tabs: [{ pos: lead2 }], runs: [R(it.num), TAB].concat(RR(glue(it.rest), it)) })));
+          } else push(P(Object.assign(base, { left: it.cont ? tw(it.cx + it.nw) : cxw, runs: RR(glue(it.t), it) })));
+          break;
+        }
+        case 'abox': {                                              // กล่อง: ตาราง 1 ช่องกว้างเต็มเนื้อความ · ข้อความกึ่งกลาง · เว้นก่อน = ระยะหลังย่อหน้าก่อนหน้า
+          var lp = out[out.length - 1];
+          if (lp && !lp.tbl && !pbb && !sectNext) lp.after = Math.max(lp.after || 0, tw(it.sp * 25.4 / 72));
+          var bc = it.t.map(function (x, xi) { return P({ jc: 'center', keepNext: xi < it.t.length - 1, runs: bold(RR(glue(x), null), it.b) }); });
+          push({ tbl: { widths: [tw(A.tw)], ind: 0, pad: tw(A.tdPad), border: Math.round(A.tdB * 8), rows: [{ cells: [bc] }] } });
+          break;
+        }
+        case 'aform': {                                             // ฟอร์ม: ข้อความ + แท็บเส้นนำจุดที่ปลายช่องกรอก · คอลัมน์ที่ 2 = แท็บธรรมดา · เลขข้อแขวน
+          var fx0 = it.x, fr = [], ft = [];
+          if (it.num) { fr.push(R(it.num), TAB); ft.push({ pos: tw(fx0 + it.nw) }); }
+          it.parts.forEach(function (q) {
+            if (q.f) { fr.push(TAB); ft.push({ pos: tw(fx0 + q.x + q.w), leader: 'dot', val: q.end ? 'right' : 'left' }); }
+            else if (q.col) { fr.push(TAB); ft.push({ pos: tw(fx0 + q.x) }); }
+            else fr = fr.concat(RR(glue(q.t), null));
+          });
+          push(P({ before: before, left: tw(fx0 + (it.num ? it.nw : 0)), hang: it.num ? tw(it.nw) : 0, tabs: ft, keepLines: true, runs: fr }));
+          break;
+        }
+        case 'afsig': {                                             // ลงชื่อฟอร์ม: บรรทัดแรก แท็บขวา (ข้อความก่อนจุด) → แท็บจุดถึงปลายช่อง → ตำแหน่ง · บรรทัดต่อไปกึ่งกลางที่แกน
+          var axw = it.ax != null ? it.ax : A.tw / 2, L2 = Math.max(0, 2 * axw - A.tw), R2 = Math.max(0, A.tw - 2 * axw);
+          it.lns.forEach(function (l, li) {
+            var o = { before: li ? 0 : before, keepNext: li < it.lns.length - 1, keepLines: true };
+            if (l.dots) push(P(Object.assign(o, { tabs: [{ pos: tw(l.fx), val: 'right' }, { pos: tw(l.fx + l.fw), leader: 'dot' }], runs: [TAB].concat(RR(glue(l.pre), null), [TAB], RR(glue(l.suf), null)) })));
+            else push(P(Object.assign(o, { jc: 'center', left: tw(L2), right: tw(R2), runs: RR(glue(l.t), null) })));
+          });
+          break;
+        }
+        case 'aqr': {                                               // QR: รูป PNG (ช่องละ 12 พิกเซล) ขนาด sz มม. · ป้ายกึ่งกลางใต้รูป · ไม่มีลิงก์ = ข้อความเตือนแทนรูป
+          var qx = it.al === 'l' ? 0 : it.al === 'c' ? (A.tw - it.sz) / 2 : A.tw - it.sz, qj = { l: 'left', c: 'center', r: 'right' }[it.al] || 'right', lab2 = it.show && it.label, e2 = Math.round(it.sz * EMUMM);
+          if (it.qr && typeof O6QR !== 'undefined') push(P({ jc: qj, before: before, keepNext: !!lab2, img: { ext: 'png', bytes: O6QR.png(it.qr, 12, A.qrQuiet), cx: e2, cy: e2 } }));
+          else push(P({ jc: qj, before: before, keepNext: !!lab2, runs: [R('[ยังไม่มีลิงก์ QR]', true)] }));
+          if (lab2) push(P({ jc: 'center', left: tw(qx), right: tw(A.tw - qx - it.sz), runs: [R(glue(it.label))] }));
+          break;
+        }
+        case 'acrest2': {                                           // ครุฑหน้าแนบ: ขึ้นส่วนใหม่ (ย่อหน้าสุดท้ายของส่วนก่อนหน้าเก็บค่าส่วน) · ไม่มีหน้าใหม่ก่อน = ครุฑกลางหน้า
+          if (sectNext) { var lq = out[out.length - 1]; if (lq && !lq.tbl && !lq.sect) lq.sect = true; else out.push(P({ sect: true, runs: [] })); sectNext = false; }
+          var c2 = crest(opts.crest, it.sz); if (c2) { c2.keepNext = true; c2.after = tw(A.crestGap); push(c2); }
+          break;
+        }
         case 'aah': { var ra = R(glue(it.t), true); ra.sz = Math.round(it.sz * 2); push(P({ jc: 'center', keepNext: true, before: before, runs: [ra] })); break; }
         case 'adate': push(P({ keepNext: true, before: before, left: tw(A.dateX), runs: [R(glue(it.t))] })); break;
         case 'asign': {
@@ -2262,12 +2700,84 @@ function doWord() {
 var FA = SS.get('afm') || {};                       // ประกาศที่เลือก + วันที่กรอก (เก็บเฉพาะแท็บนี้ · ไม่มีข้อมูลบุคคล)
 function annList() { return (DATA && DATA.anns) || []; }
 function curA() { var l = annList(), el = $('a-ann'), id = el ? el.value : ''; for (var i = 0; i < l.length; i++) if (String(l[i].id) === id) return l[i]; return null; }
-function optsA() { var d = $('a-date'), g = $('a-dg'); return { date: d ? d.value : '', digits: g && g.value === 'ar' ? 'ar' : 'th', crest: CREST }; }
+function optsA() { var d = $('a-date'), g = $('a-dg'); return { date: d ? d.value : '', digits: g && g.value === 'ar' ? 'ar' : 'th', crest: CREST, qr: qrOver() }; }
 function saveFormA() { var a = curA(), g = $('a-dg').value === 'ar' ? 'ar' : 'th'; FA = { ann: a ? a.name : '', date: $('a-date').value }; SS.set('afm', FA); LS.set('dga', g); }
 function warnsA() {
-  var a = curA(), w = ((DATA && DATA.annWarn) || []).concat(a ? a.warn || [] : []);
+  var a = curA(), lw = R && R.lw && MODE === 'ann' ? R.lw : [], w = ((DATA && DATA.annWarn) || []).concat(a ? a.warn || [] : []).filter(function (x) { return !(QV[qrKeyOf(x)] && /^QR "/.test(x)); }).concat(lw);   // ข้อเตือน QR ของป้ายที่วางลิงก์ใหม่แล้ว = แสดงที่ช่อง QR แทน
   $('warn').innerHTML = w.length ? '<div class="hint warn"><details open><summary>⚠ ข้อสังเกตจากชีต ' + w.length + ' ข้อ (ไม่พิมพ์ลงประกาศ)</summary><ul>' + w.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></details></div>' : '';
-  checksA();
+  checksA(); qrUI();
+}
+/* ---------- QR ใบรับรองผลการเรียน (ระบบ 6 ช่วง 6C) ----------
+   ลิงก์เก็บในชีต (แท็บ ประกาศ·QR) ไม่ฝังในหน้านี้ · วางลิงก์ใหม่ = ใช้ในตัวอย่าง/พิมพ์/Word ทันที (เก็บเป็นร่างในแท็บเบราว์เซอร์นี้ ddn5-aqr)
+   · 💾 บันทึกลงชีต = action qrsave (ใช้ได้ทุกเครื่อง · เซิร์ฟเวอร์ใส่ปีการศึกษาให้) · ภาพ QR สร้างในเครื่องด้วย O6QR (ไม่ส่งลิงก์ไปที่อื่น)
+   ตรวจ: ต้องเป็น drive.google.com / docs.google.com · ไฟล์เดียวกับป้ายอื่น = ไม่ใช้ ไม่บันทึก (ปีที่แล้ว ข กับ จ ใช้ลิงก์ซ้ำกันโดยผิดพลาด) · ว่าง = เตือน */
+var QV = SS.get('aqr') || {}, QSAVE = '';
+var QRRX = /^https:\/\/(?:drive|docs)\.google\.com\/\S+$/;
+function qrKeyOf(w) { var m = /^QR "([^"]*)"/.exec(String(w)); return m ? m[1] : ''; }
+function qrId(u) { var x = String(u || '').trim(), m = /\/(?:d|folders)\/([\w-]{10,})/.exec(x) || /[?&]id=([\w-]{10,})/.exec(x); return m ? m[1] : x.replace(/[?#].*$/, '').replace(/\/+$/, ''); }
+function qrRows() { return (DATA && DATA.annQr) || []; }
+function qrSheetUrl(key) { var r = qrRows().filter(function (q) { return q.key === key; })[0]; if (r) return r.url || ''; var a = curA(), q = ((a && a.qrs) || []).filter(function (x) { return x.key === key; })[0]; return q ? q.url || '' : ''; }
+/** สถานะของลิงก์ที่วาง: { ok, msg } · ok = ใช้ในตัวอย่างได้ */
+function qrCheck(key, u) {
+  if (!u) return { ok: false, msg: 'ยังไม่มีลิงก์' };
+  if (!QRRX.test(u)) return { ok: false, msg: '✗ ต้องเป็นลิงก์ Google Drive (ขึ้นต้น https://drive.google.com/ หรือ https://docs.google.com/)' };
+  if (u.length > 200) return { ok: false, msg: '✗ ลิงก์ยาวเกินไป (' + u.length + ' ตัวอักษร · ได้ไม่เกิน 200) — ใช้ลิงก์แชร์ของไฟล์โดยตรง' };
+  var id = qrId(u), dup = qrRows().filter(function (q) { return q.key !== key && q.url && qrId(q.url) === id; }).map(function (q) { return q.key; });
+  Object.keys(QV).forEach(function (k) { if (k !== key && QV[k] && qrId(QV[k]) === id && dup.indexOf(k) < 0) dup.push(k); });
+  if (dup.length) return { ok: false, dup: true, msg: '✗ เป็นไฟล์เดียวกับป้าย ' + dup.join(', ') + ' — แต่ละประกาศต้องใช้ไฟล์ใบรับรองของตัวเอง (ปีที่แล้วผิดแบบนี้)' };
+  return { ok: true };
+}
+/** ลิงก์ที่วางใหม่และผ่านการตรวจ → { ป้าย: ลิงก์ } ส่งให้ตัวสร้างประกาศใช้แทนลิงก์ในชีต */
+function qrOver() { var o = {}; Object.keys(QV).forEach(function (k) { if (qrCheck(k, QV[k]).ok) o[k] = QV[k]; }); return o; }
+function qrUI() {
+  var el = $('qrbox'); if (!el) return;
+  var a = curA(), qs = (a && a.qrs) || [], yr = DATA && DATA.year || '';
+  if (!qs.length) { el.innerHTML = ''; el._k = ''; return; }
+  var sig = qs.map(function (q) { return q.key; }).join('|');
+  if (el._k !== sig) {                                                                   // สร้างช่องใหม่เมื่อเปลี่ยนประกาศ (พิมพ์ค้างอยู่ไม่หาย)
+    el._k = sig;
+    el.innerHTML = '<fieldset><legend>QR ใบรับรองผลการเรียน (หน้าแนบ)</legend>' + qs.map(function (q, i) {
+      return '<label class="fl">ลิงก์ Google Drive ของไฟล์ปี ' + esc(yr) + ' · ป้าย ' + esc(q.key) + '<input id="qr-' + i + '" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://drive.google.com/file/d/…/view?usp=sharing"></label>' +
+        '<div class="info qst" id="qi-' + i + '"></div><div class="row"><button type="button" id="qs-' + i + '">💾 บันทึกลิงก์ลงชีต</button><button type="button" id="qb-' + i + '" title="ทิ้งลิงก์ที่วาง กลับไปใช้ลิงก์ในชีต">↩ ใช้ลิงก์ในชีต</button><a id="qo-' + i + '" target="_blank" rel="noopener noreferrer">เปิดลิงก์ทดสอบ ↗</a></div>';
+    }).join('') + '<div class="info">ก่อนพิมพ์: ตั้งสิทธิ์ไฟล์ใน Google Drive เป็น <b>ทุกคนที่มีลิงก์ดูได้</b> แล้วสแกน QR บนหน้าตัวอย่างด้วยมือถือ · ลิงก์ที่วางใช้ในตัวอย่าง/พิมพ์/Word ทันที · กดบันทึกเพื่อให้ทุกเครื่องใช้ลิงก์นี้</div></fieldset>';
+    qs.forEach(function (q, i) {
+      var inp = $('qr-' + i); inp.value = QV[q.key] !== undefined ? QV[q.key] : q.url || '';
+      inp.addEventListener('input', function () { var v = this.value.trim(); if (v === (qrSheetUrl(q.key) || '')) delete QV[q.key]; else QV[q.key] = v; SS.set('aqr', QV); qrStat(); warnsA(); draw(); });
+      $('qs-' + i).onclick = function () { qrSave(q.key, i); };
+      $('qb-' + i).onclick = function () { delete QV[q.key]; SS.set('aqr', QV); inp.value = qrSheetUrl(q.key); warnsA(); draw(); };
+    });
+  }
+  qrStat();
+}
+function qrStat() {
+  var a = curA(), qs = (a && a.qrs) || [], yr = String(DATA && DATA.year || '');
+  qs.forEach(function (q, i) {
+    var inp = $('qr-' + i); if (!inp) return;
+    var sheet = qrSheetUrl(q.key), row = qrRows().filter(function (r) { return r.key === q.key; })[0] || {}, v = inp.value.trim(), draft = QV[q.key] !== undefined, c = qrCheck(q.key, v), msg, cls;
+    if (!v) { msg = '⚠ ยังไม่มีลิงก์ — วางลิงก์แล้วตัวอย่างจะมี QR ทันที (ยังไม่มีลิงก์ = กรอบเส้นประในหน้าแนบ)'; cls = 'bad'; }
+    else if (!c.ok) { msg = c.msg + (draft ? ' · ตัวอย่างยังใช้ ' + (sheet ? 'ลิงก์ในชีต' : 'กรอบว่าง') : ''); cls = 'bad'; }
+    else if (draft) { msg = '✓ ใช้ลิงก์ที่วางในตัวอย่าง/พิมพ์/Word แล้ว · ยังไม่ได้บันทึกลงชีต (เครื่องอื่นยังใช้ลิงก์เดิม)'; cls = 'ok'; }
+    else if (row.year && row.year !== yr) { msg = '⚠ ลิงก์ในชีตตั้งไว้สำหรับปีการศึกษา ' + row.year + ' — ตรวจว่าเป็นไฟล์ของปี ' + yr + ' แล้ววางลิงก์ใหม่/กดบันทึก'; cls = 'bad'; }
+    else if (!row.year) { msg = '⚠ ลิงก์ในชีตยังไม่ระบุปี — ตรวจว่าเป็นไฟล์ของปี ' + yr + ' แล้วกดบันทึก (ระบบใส่ปีให้)'; cls = 'bad'; }
+    else { msg = '✓ ใช้ลิงก์ในชีต (ตั้งไว้ปี ' + row.year + ')'; cls = 'ok'; }
+    var st = $('qi-' + i); st.textContent = msg; st.className = 'info qst ' + cls;
+    var canSave = !QSAVE && c.ok && (draft || (row.year !== yr && !!v));
+    $('qs-' + i).disabled = !canSave; $('qs-' + i).textContent = QSAVE === q.key ? 'กำลังบันทึก…' : '💾 บันทึกลิงก์ลงชีต';
+    $('qb-' + i).disabled = !draft || !!QSAVE;
+    var o = $('qo-' + i); if (c.ok) { o.href = v; o.classList.remove('hide'); } else { o.removeAttribute('href'); o.classList.add('hide'); }
+  });
+}
+function qrSave(key, i) {
+  var v = ($('qr-' + i) || {}).value; v = String(v || '').trim();
+  if (QSAVE || !qrCheck(key, v).ok) return;
+  QSAVE = key; qrStat();
+  send({ a: 'qrsave', token: TOKEN, key: key, url: v, base: qrSheetUrl(key) }, 90000).then(function (r) {
+    QSAVE = '';
+    if (r && r.ok) { if (QV[key] === v) delete QV[key]; SS.set('aqr', QV); DATA = r.data; LOADED = r.at || Date.now(); var q = $('qrbox'); if (q) q._k = ''; showWork(); toast('บันทึกลิงก์ QR ลงชีตแล้ว · ใช้ได้ทุกเครื่อง'); return; }
+    qrStat();
+    if (r && r.code === 'AUTH') { TOKEN = ''; SS.set('tok', null); showLogin('หมดเวลาเข้าสู่ระบบ — ลิงก์ที่วางยังเก็บไว้ ใส่รหัสผ่านแล้วกดบันทึกอีกครั้ง'); return; }
+    toast((r && r.error) || 'บันทึกไม่ได้', true);
+  }, function (e) { QSAVE = ''; qrStat(); toast(e.message + ' (ลิงก์ที่วางยังใช้ในตัวอย่างได้)', true); });
 }
 /* เช็กลิสต์ "ต้องตรวจก่อนพิมพ์จริง" (แท็บ ประกาศ·ตรวจ ในชีต) — ดูอย่างเดียว ติ๊กในชีตแล้วกด ↻ · ไม่พิมพ์ลงประกาศ · ไม่บล็อกการพิมพ์ (ร่างพิมพ์ดูได้) */
 function chkLeft(a) { var n = 0; ((a && a.checks) || []).forEach(function (c) { if (!c.done) n++; }); return n; }
@@ -2292,6 +2802,7 @@ function showAnn() {
         '<label>ประกาศ ณ วันที่<input id="a-date" type="date"></label>' +
         '<label>ตัวเลขในประกาศ<select id="a-dg"><option value="th">เลขไทย (๑ ๒ ๓)</option><option value="ar">เลขอารบิก (1 2 3)</option></select></label></div>' +
         '<div class="info">เว้นวันที่ว่าง = เว้นที่ไว้เขียนวันที่เอง (พิมพ์ "ประกาศ ณ วันที่ … พ.ศ. …")</div></fieldset>' +
+        '<div id="qrbox"></div>' +
         '<div class="info" id="ayr"></div>' +
         '<div class="info">ข้อความ ตาราง และผู้ลงนามของประกาศอยู่ในชีต (แท็บ <b>ประกาศ·…</b>) — หน้านี้ไม่มีช่องแก้ข้อความ · แก้ในชีตแล้วกด <b>↻ โหลดใหม่</b></div></section>');
       $('a-date').value = FA.date || ''; $('a-dg').value = LS.get('dga') === 'ar' ? 'ar' : 'th';
@@ -2321,11 +2832,13 @@ function drawAnn() {
   try { R = O5ORDER.renderAnn(host, DATA, a, optsA()); }
   catch (e) { host.style.minHeight = ''; host.innerHTML = '<div class="empty">สร้างประกาศไม่ได้</div>'; $('info').textContent = ''; toast('สร้างประกาศไม่ได้: ' + e.message, true); $('bprint').disabled = $('bword').disabled = true; return; }
   pv.scrollTop = sy; if (wy) window.scrollTo(0, wy); host.style.minHeight = ''; pv.scrollTop = sy; if (wy) window.scrollTo(0, wy);
-  var nl = chkLeft(a);
-  $('info').textContent = R.pages.length + ' หน้า' + (optsA().date ? '' : ' · ยังไม่กรอกวันที่ประกาศ (เว้นที่ว่างไว้)') + (nl ? ' · ⚠ ต้องตรวจก่อนพิมพ์จริง ยังไม่ตรวจ ' + nl + ' ข้อ' : '');
-  $('info').classList.toggle('bad', nl > 0);
+  var nl = chkLeft(a), nq = R.items.filter(function (it) { return it.k === 'aqr' && !it.qr; }).length;   // QR ที่ยังไม่มีลิงก์ (หน้าแนบพิมพ์เป็นกรอบเส้นประ)
+  $('info').textContent = R.pages.length + ' หน้า' + (optsA().date ? '' : ' · ยังไม่กรอกวันที่ประกาศ (เว้นที่ว่างไว้)') + (nq ? ' · ⚠ ยังไม่มีลิงก์ QR' : '') + (nl ? ' · ⚠ ต้องตรวจก่อนพิมพ์จริง ยังไม่ตรวจ ' + nl + ' ข้อ' : '');
+  $('info').classList.toggle('bad', nl > 0 || nq > 0);
   $('bprint').disabled = $('bword').disabled = false; pageNow();
+  var lk = (R.lw || []).join('\n'); if (lk !== LWK) { LWK = lk; warnsA(); }                 // ข้อสังเกตตอนจัดหน้า (ช่องกรอกแคบ ฯลฯ) เปลี่ยน → แสดงในกล่องข้อสังเกต
 }
+var LWK = '';
 
 /* ---------- เริ่มต้น ---------- */
 $('logo').src = LOGO;
