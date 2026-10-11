@@ -161,6 +161,8 @@ textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radiu
 .o6-ti{text-indent:5mm}
 .o6-sl{padding-left:5mm}
 .o6pg .nb{white-space:nowrap}
+.o6pg .o6-tc{display:inline-block;white-space:nowrap;vertical-align:baseline}
+.o6pg .o6-tc:empty{display:none}   /* สำเนาเปล่าที่ตัวจัดกระจายทิ้งไว้ท้ายบรรทัดก่อนหน้า (ช่องจริงมีข้อความ/ZWSP เสมอ) */   /* แท็บ ⇥ ในย่อหน้าแขวน (ช่วง 6E-แท็บ): ช่องก่อน ⇥ กว้างอย่างน้อย GA.tab (min-width ตั้งใน style) ข้อความถัดไปเริ่มที่คอลัมน์เดียวกันทุกบรรทัด */
 .o6pg u{text-decoration:underline;text-decoration-skip-ink:none}   /* ขีดเส้นใต้ __…__ ในประกาศ: ต่อเนื่องใต้พยัญชนะที่มีสระล่าง (ฐ ฎ ฏ ุ ู) เหมือน Word · ไม่ใช่ตัวหนา */
 .o6-r{text-align:right}
 .o6-pb{height:0;overflow:hidden}
@@ -1268,6 +1270,7 @@ var O5ORDER = (function () {
     dateX: 31.5, spDate: 6, signX: 44, signW: 80, signGap: 4,     // ประกาศ ณ วันที่ เยื้อง 31.5 เว้นก่อน 6 pt · เว้น 4 บรรทัด ลงนามกึ่งกลางกล่อง 44–124 (cover.css)
     tdPad: 1.9, tdB: 0.5, numMin: 16, tbItem: 5, spTb: 6,         // ตาราง: ระยะในช่อง · เส้น 0.5 pt · ช่องตัวเลขกว้างอย่างน้อย 16 · แถวรายการเยื้องบรรทัดแรก 5 · เว้นหลังตาราง 6 pt
     tight: 0.02,                                                  // บีบช่องไฟดึงคำตกท้ายย่อหน้า (เท่ากับคำสั่ง)
+    tab: 34,                                                      // แท็บ ⇥ ในย่อหน้าแขวน (ช่วง 6E-แท็บ · ตัวอย่าง: 1. วิชา…⇥2. วิชา…): คอลัมน์ถัดไปห่างจากต้นข้อความ (หลังเลข/จุดนำ) เท่านี้ · 2 แท็บ = 2 เท่า · ต้นฉบับ Word ปีก่อน 33.7 มม.
     // ห้องเรียนพิเศษ (ช่วง 6C · ตามร่าง ข): กำหนดการ ● ที่ระดับ 2 (20 มม.) ป้ายหลังจุด 5 มม. ข้อความคอลัมน์ที่ 60 มม. (ป้ายยาวกว่านั้น = เลื่อนทั้งชุด) · กล่อง เว้นก่อน/หลัง 6 pt
     // · ฟอร์ม เว้นก่อนบรรทัด 3 pt (บรรทัดแรกของชุด 9 pt) คอลัมน์ที่ 2 ห่างข้อความยาวสุด 5 มม. ช่องกรอกแคบสุด 8 มม. · QR ขอบขาว 2 ช่อง
     schDot: 5, schCol: 60, schGap: 3, spBox: 6, formSp: 3, formSp0: 9, formGap: 5, formMin: 8, qrQuiet: 2
@@ -1721,6 +1724,19 @@ var O5ORDER = (function () {
   var ANB = new RegExp('(?:(?:ลง)?วันที่\\s*)?[0-9๐-๙]{1,2}(?:\\s*[–—-]\\s*[0-9๐-๙]{1,2})?\\s*(?:' + MONTHS.join('|') + ')\\s*(?:พ\\.ศ\\.\\s*)?[0-9๐-๙]{4}' +
     '|(?:พ\\.ศ\\.|ปีการศึกษา|มาตรา|ข้อ|ที่)\\s*[0-9๐-๙]+(?:\\.[0-9๐-๙]+)*|ไม่(?:ต่ำ|น้อย|มาก)กว่า\\s*[0-9๐-๙][0-9๐-๙.,]*|ไม่เกิน\\s*[0-9๐-๙][0-9๐-๙.,]*|เทียบเท่า', 'g');   // เทียบเท่า: ตัวตัดคำแยกเป็น เทียบ|เท่า (ช่วง 6C)
   function annText(t) { return ulHtml(boldHtml(esc(ulMark(t)).replace(ANB, '<span class="nb">$&</span>'))).replace(/\n/g, '<br>'); }
+  /** แท็บ ⇥ (ช่วง 6E-แท็บ · ใช้ได้ในย่อหน้าแขวน = ขึ้นต้นด้วยเลข/จุดนำ + แขวน=ใช่): ทุกบรรทัด (ขึ้นด้วย ↵) แบ่งที่ ⇥ → ช่องก่อน ⇥ กว้างอย่างน้อย GA.tab (min-width) แล้วข้อความถัดไปเริ่มที่ GA.tab · 2·GA.tab …
+      (เท่ากับแท็บ Word ที่ตั้งทุก GA.tab จากต้นข้อความ) · ** และ __ ห้ามคร่อม ⇥ · ข้อความที่ไม่มี ⇥ = annText เดิมทุกไบต์
+      ท้ายช่องมีช่องว่าง 1 ตัว (ไม่กินที่ · nowrap ตัดช่องว่างท้ายบรรทัด) เพื่อ (1) ข้อความที่อ่านจาก DOM (คำต่อท้ายหน้า · คัดลอก) มีช่องว่างคั่นระหว่างช่อง (2) ช่องไม่ว่างเปล่า — order.css ซ่อน .o6-tc:empty
+      เพราะตัวจัดกระจาย (ddn_just) แยกบรรทัดแล้วทิ้งสำเนาเปล่าของช่องแรกไว้ท้ายบรรทัดก่อนหน้า (ถ้าไม่ซ่อนจะเป็นบรรทัดว่างเพิ่ม) */
+  var TABC = '⇥';
+  function annTabText(t) {
+    t = String(t);
+    if (t.indexOf(TABC) < 0) return annText(t);
+    return t.split('\n').map(function (ln) {
+      var ps = ln.split(TABC);
+      return ps.map(function (p, i) { return i < ps.length - 1 ? '<span class="o6-tc" style="min-width:' + mm(GA.tab) + '">' + (annText(p) || '\u200B') + ' </span>' : annText(p); }).join('');
+    }).join('<br>');
+  }
   /** โครงประกาศเป็นรายการชิ้น (ใช้ร่วมหน้าเว็บและ Word) — ข้อความแปลงเลขไทย/อารบิกแล้ว */
   function annLayout(data, ann, opts) {
     opts = opts || {};
@@ -1815,6 +1831,28 @@ var O5ORDER = (function () {
       }
     });
     annPrep6C(items, mw, mb);
+    annPrepTab(items, mw, mb);
+  }
+  /** แท็บ ⇥ (ช่วง 6E-แท็บ): ใช้ได้เฉพาะย่อหน้าแขวนที่มีเลข/จุดนำ (it.num) · ย่อหน้าอื่น → ⇥ = ช่องว่าง + ข้อสังเกต (items.lw) · ข้อความก่อน ⇥ ยาวชนระยะแท็บ → ข้อสังเกต (คอลัมน์ถัดไปเลื่อน) */
+  function annPrepTab(items, mw, mb) {
+    var lw = items.lw || (items.lw = []);
+    var wb = function (t) { return boldParts(t).reduce(function (a, p) { return a + (p.b ? mb : mw)(p.t); }, 0); };
+    items.forEach(function (it) {
+      if (it.k !== 'ap' || String(it.t).indexOf(TABC) < 0) return;
+      var nm = plain(ulPlain(it.t)).replace(/\n/g, ' ').replace(new RegExp(TABC, 'g'), ' ').slice(0, 24);
+      if (!it.num) {
+        it.t = it.t.split(TABC).join(' ');
+        lw.push('ย่อหน้า "' + nm + '…": มีแท็บ ⇥ แต่ไม่ได้เป็นย่อหน้าแขวน (ตั้ง แขวน=ใช่ และขึ้นต้นด้วยเลขข้อ/จุด •) — ใช้ช่องว่างแทน');
+        return;
+      }
+      String(it.rest).split('\n').forEach(function (ln) {
+        var ps = ln.split(TABC); ps.pop();
+        ps.forEach(function (p) {
+          var w = it.b ? mb(plain(ulPlain(p))) : wb(ulPlain(p));
+          if (w > GA.tab - 1) lw.push('ย่อหน้า "' + nm + '…": ข้อความก่อนแท็บ ⇥ ยาว ' + w.toFixed(1) + ' มม. ชนระยะแท็บ ' + GA.tab + ' มม. ("' + plain(ulPlain(p)).slice(0, 20) + '") — คอลัมน์ถัดไปเลื่อนไปทางขวา');
+        });
+      });
+    });
   }
   /** ห้องเรียนพิเศษ (ช่วง 6C) — วัดตำแหน่งที่หน้าเว็บและ Word ใช้ร่วมกัน (มม. จากขอบซ้ายของเนื้อความ):
       กำหนดการ: it.lx ป้าย · it.cx คอลัมน์ข้อความ (ชุดที่ติดกันใช้ค่าเดียว) · บรรทัดต่อที่ขึ้นต้นด้วยเลข = แขวน (it.num it.nw it.rest)
@@ -1928,7 +1966,7 @@ var O5ORDER = (function () {
       case 'asubj': return '<div class="o5-c o5-b">' + esc(it.t) + '</div>';
       case 'arule': return '<div class="o5-c o6-rule">' + it.t + '</div>';
       case 'ap':
-        if (it.num) return '<p class="o6-p tj' + (it.b ? ' o5-b' : '') + '" style="' + sp + 'padding-left:' + mm(it.x + it.nw) + ';text-indent:' + mm(-it.nw) + '"' + ATIGHT + br(it.t) + '><span class="o5-nn' + (it.nb ? ' o5-b' : '') + '">' + esc(it.num) + ' </span>' + annText(it.rest) + '</p>';
+        if (it.num) return '<p class="o6-p tj' + (it.b ? ' o5-b' : '') + '" style="' + sp + 'padding-left:' + mm(it.x + it.nw) + ';text-indent:' + mm(-it.nw) + '"' + ATIGHT + br(it.t) + '><span class="o5-nn' + (it.nb ? ' o5-b' : '') + '">' + esc(it.num) + ' </span>' + annTabText(it.rest) + '</p>';
         return '<p class="o6-p tj' + (it.b ? ' o5-b' : '') + '" style="' + sp + 'text-indent:' + mm(it.x) + '"' + ATIGHT + br(it.t) + '>' + annText(it.t) + '</p>';
       case 'anote':
         if (it.num) return '<p class="o6-p o6-note tj' + (it.b ? ' o5-b' : '') + '" style="' + sp + 'padding-left:' + mm(it.x + it.lw + it.nw) + ';text-indent:' + mm(-it.nw) + ';--lx:' + mm(it.x) + '"' + (it.first && it.label ? ' data-label="' + esc(it.label) + '"' : '') + ATIGHT + br(it.t) + '><span class="o5-nn' + (it.nb ? ' o5-b' : '') + '">' + esc(it.num) + ' </span>' + annText(it.rest) + '</p>';
@@ -1985,7 +2023,7 @@ var O5ORDER = (function () {
     else if (it.k === 'ath') t = it.rows[0] && it.rows[0][0] ? it.rows[0][0].t : '';
     else if (a.line > 0) t = a.text;
     else t = (it.k === 'anote' && it.first && it.label ? it.label + ' ' : '') + (it.t || it.name || '');
-    t = ulPlain(plain(t)).replace(/\s+/g, ' ').replace(/^ /, '');
+    t = ulPlain(plain(t)).replace(/⇥/g, ' ').replace(/\s+/g, ' ').replace(/^ /, '');   // แท็บ ⇥ = คั่นคำ (ช่วง 6E-แท็บ)
     if (it.k === 'aah' && t.length <= 24) return '/' + t + '...';
     var m = a.line > 0 ? null : NUMP.exec(t);
     return '/' + (m ? m[1] + ' ' + firstWord(t.slice(m[0].length), ANNW) : firstWord(t, ANNW)) + '...';
@@ -2316,11 +2354,14 @@ var O5DOCX = (function () {
         case 'ap': {
           var close = it.close && nx.k === 'adate', segs = String(it.num ? it.rest : it.t).split('\n');
           segs.forEach(function (seg, si) {
-            var runs = bold(RRA(glue(seg), it), it.b), last = si === segs.length - 1, o;
+            var parts = seg.split('⇥'), runs, last = si === segs.length - 1, o;      // แท็บ ⇥ (ช่วง 6E-แท็บ · เฉพาะย่อหน้าแขวน): ข้อความ → TAB → ข้อความ … · แท็บตั้งทุก GA.tab จากต้นข้อความ ตรงกับ min-width ของหน้าเว็บ
+            if (parts.length < 2) runs = bold(RRA(glue(seg), it), it.b);
+            else { runs = []; parts.forEach(function (p, pi) { if (pi) runs.push(TAB); if (p) runs = runs.concat(bold(RRA(glue(p), it), it.b)); }); }
             if (it.num) {                                           // แขวน: เลขข้อ → TAB → ข้อความ · บรรทัดต่อตรงข้อความหลังเลข
-              var lx = tw(it.x + it.nw);
+              var lx = tw(it.x + it.nw), stops = [];
+              for (var tk = 1; tk < parts.length; tk++) stops.push({ pos: lx + tw(A.tab * tk) });
               if (!si) runs = [R(it.num, it.nb), TAB].concat(runs);
-              o = { left: lx, hang: si ? 0 : lx - tw(it.x), tabs: si ? [] : [{ pos: lx }] };
+              o = { left: lx, hang: si ? 0 : lx - tw(it.x), tabs: (si ? [] : [{ pos: lx }]).concat(stops) };
             } else o = { first: si ? 0 : tw(it.x) };
             push(P(Object.assign({ jc: 'thaiDistribute', before: si ? 0 : before, widow: true, keepNext: it.keep || close || !last, keepLines: it.keep || close || segs.length > 1, runs: runs }, o)));
           });
