@@ -161,6 +161,7 @@ textarea{font:inherit;color:var(--ink);border:1px solid var(--line);border-radiu
 .o6-ti{text-indent:5mm}
 .o6-sl{padding-left:5mm}
 .o6pg .nb{white-space:nowrap}
+.o6pg u{text-decoration:underline;text-decoration-skip-ink:none}   /* ขีดเส้นใต้ __…__ ในประกาศ: ต่อเนื่องใต้พยัญชนะที่มีสระล่าง (ฐ ฎ ฏ ุ ู) เหมือน Word · ไม่ใช่ตัวหนา */
 .o6-r{text-align:right}
 .o6-pb{height:0;overflow:hidden}
 .o6-date{padding-left:31.5mm}
@@ -1291,6 +1292,13 @@ var O5ORDER = (function () {
   function boldHtml(h) { return unlit(lit(h).replace(/\*\*([^*]+?)\*\*/g, '<b>$1</b>')); }
   /** ข้อความ → [{ t, b }] แยกส่วนตัวหนา (ตามเครื่องหมาย **) · ใช้ในไฟล์ Word */
   function boldParts(t) { var out = [], re = /\*\*([^*]+?)\*\*/g, m, p = 0; t = lit(t); while ((m = re.exec(t))) { if (m.index > p) out.push({ t: unlit(t.slice(p, m.index)), b: false }); out.push({ t: unlit(m[1]), b: true }); p = m.index + m[0].length; } if (p < t.length || !out.length) out.push({ t: unlit(t.slice(p)), b: false }); return out; }
+  /** ขีดเส้นใต้ในประกาศ (เฉพาะข้อความประกาศ — คำสั่ง ①–⑦ ไม่แตะ boldHtml/plain/boldParts): __ข้อความ__ → <u> (หน้าเว็บ) / run ขีดเส้นใต้ (Word)
+      · ซ้อนกับ **ตัวหนา** ได้ (**__ข้อความ__** · __**ข้อความ**__) แต่ห้ามไขว้ · คู่ต้องอยู่บรรทัดเดียวกัน (ไม่คร่อม ↵) · ข้อความที่ไม่มี __ ได้ผลเหมือนเดิมทุกไบต์
+      ulMark: __x__ → \u0001x\u0002 (ตัวแทนที่ไม่ชนกับข้อความจริง ผ่านขั้นตอนอื่นไปได้) · ulHtml: ตัวแทน → <u>…</u> · ulPlain: ตัดเครื่องหมายออก */
+  var ULX = /__([^_\n]+?)__/g;
+  function ulMark(t) { t = String(t); return t.indexOf('__') < 0 ? t : t.replace(ULX, '\u0001$1\u0002'); }
+  function ulHtml(h) { return h.indexOf('\u0001') < 0 ? h : h.replace(/\u0001/g, '<u>').replace(/\u0002/g, '</u>'); }
+  function ulPlain(t) { t = String(t); return t.indexOf('__') < 0 ? t : t.replace(ULX, '$1'); }
   function ymd(iso) { var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(String(iso || '')); if (!m) return null; var y = +m[1]; return { y: y < 2400 ? y + 543 : y, m: +m[2], d: +m[3] }; }
   /** 'YYYY-MM-DD' (ค.ศ. หรือ พ.ศ.) → '28 ตุลาคม พ.ศ. 2569' · ไม่ใช่วันที่ → ข้อความเดิม · bare = ไม่มีคำว่า พ.ศ. (วันที่ในตาราง: '8 กุมภาพันธ์ 2570') */
   function thaiDate(iso, bare) { var x = ymd(iso); return x && x.m >= 1 && x.m <= 12 ? x.d + ' ' + MONTHS[x.m - 1] + (bare ? ' ' : ' พ.ศ. ') + x.y : String(iso || ''); }
@@ -1712,7 +1720,7 @@ var O5ORDER = (function () {
       วันที่เต็ม (วันที่ ๘ – ๑๒ กุมภาพันธ์ ๒๕๗๐ · ลงวันที่ ๒๘ สิงหาคม ๒๕๖๘) · พ.ศ./ปีการศึกษา/มาตรา/ข้อ/ที่ + ตัวเลข · ไม่ต่ำกว่า/ไม่น้อยกว่า/ไม่มากกว่า/ไม่เกิน + ตัวเลข (ไม่ต่ำกว่า ๒.๕๐) */
   var ANB = new RegExp('(?:(?:ลง)?วันที่\\s*)?[0-9๐-๙]{1,2}(?:\\s*[–—-]\\s*[0-9๐-๙]{1,2})?\\s*(?:' + MONTHS.join('|') + ')\\s*(?:พ\\.ศ\\.\\s*)?[0-9๐-๙]{4}' +
     '|(?:พ\\.ศ\\.|ปีการศึกษา|มาตรา|ข้อ|ที่)\\s*[0-9๐-๙]+(?:\\.[0-9๐-๙]+)*|ไม่(?:ต่ำ|น้อย|มาก)กว่า\\s*[0-9๐-๙][0-9๐-๙.,]*|ไม่เกิน\\s*[0-9๐-๙][0-9๐-๙.,]*|เทียบเท่า', 'g');   // เทียบเท่า: ตัวตัดคำแยกเป็น เทียบ|เท่า (ช่วง 6C)
-  function annText(t) { return boldHtml(esc(t).replace(ANB, '<span class="nb">$&</span>')).replace(/\n/g, '<br>'); }
+  function annText(t) { return ulHtml(boldHtml(esc(ulMark(t)).replace(ANB, '<span class="nb">$&</span>'))).replace(/\n/g, '<br>'); }
   /** โครงประกาศเป็นรายการชิ้น (ใช้ร่วมหน้าเว็บและ Word) — ข้อความแปลงเลขไทย/อารบิกแล้ว */
   function annLayout(data, ann, opts) {
     opts = opts || {};
@@ -1977,7 +1985,7 @@ var O5ORDER = (function () {
     else if (it.k === 'ath') t = it.rows[0] && it.rows[0][0] ? it.rows[0][0].t : '';
     else if (a.line > 0) t = a.text;
     else t = (it.k === 'anote' && it.first && it.label ? it.label + ' ' : '') + (it.t || it.name || '');
-    t = plain(t).replace(/\s+/g, ' ').replace(/^ /, '');
+    t = ulPlain(plain(t)).replace(/\s+/g, ' ').replace(/^ /, '');
     if (it.k === 'aah' && t.length <= 24) return '/' + t + '...';
     var m = a.line > 0 ? null : NUMP.exec(t);
     return '/' + (m ? m[1] + ' ' + firstWord(t.slice(m[0].length), ANNW) : firstWord(t, ANNW)) + '...';
@@ -2083,7 +2091,7 @@ var O5ORDER = (function () {
     return { pages: out, items: items, atoms: atoms, plan: pages, solo: solo.slice(), lw: (items.lw || []).slice() };
   }
 
-  var api = { G: G, plain: plain, boldParts: boldParts, sbcols: sbcols, digits: digits, thaiDate: thaiDate, tcols: tcols, ncol: ncol, tabcols: tabcols, labcols: labcols, layout: layout, columns: columns, render: render, measurer: measurer, contOf: contOf, MM: MM,
+  var api = { G: G, plain: plain, boldParts: boldParts, ulMark: ulMark, sbcols: sbcols, digits: digits, thaiDate: thaiDate, tcols: tcols, ncol: ncol, tabcols: tabcols, labcols: labcols, layout: layout, columns: columns, render: render, measurer: measurer, contOf: contOf, MM: MM,
               GA: GA, annLayout: annLayout, annPrep: annPrep, renderAnn: renderAnn, contAnn: contAnn, firstWordAnn: function (t) { return firstWord(t, ANNW); }, NUMP: NUMP };
   if (typeof window !== 'undefined') window.O5ORDER = api;
   return api;
@@ -2124,6 +2132,23 @@ var O5DOCX = (function () {
   /** ข้อความที่มีตัวหนา **…** → รายการ run (บีบช่องไฟเท่าหน้าเว็บ) */
   function RR(t, it) {
     return O5ORDER.boldParts(t).map(function (x) { var r = RT(x.t, it); r.b = x.b; return r; });
+  }
+  /** ประกาศ (ย่อหน้า/หมายเหตุ/กำหนดการ — ชนิดที่หน้าเว็บใช้ annText): ข้อความที่มีขีดเส้นใต้ __…__ → run ขีดเส้นใต้ (ซ้อนกับ **ตัวหนา** ได้ · สถานะขีดเส้นใต้ต่อเนื่องข้าม run)
+      · ข้อความที่ไม่มี __ = RR เดิมทุกไบต์ (คำสั่ง ①–⑦ ไม่เรียกฟังก์ชันนี้) */
+  function RRA(t, it) {
+    var m = O5ORDER.ulMark(t);
+    if (m === t) return RR(t, it);
+    var u = false, out = [];
+    RR(m, it).forEach(function (r) {
+      var buf = '';
+      var flush = function () { if (buf) { var q = {}; for (var k in r) q[k] = r[k]; q.t = buf; q.u = u; out.push(q); } buf = ''; };
+      for (var i = 0; i < r.t.length; i++) {
+        var c = r.t.charAt(i);
+        if (c === '\u0001' || c === '\u0002') { flush(); u = c === '\u0001'; } else buf += c;
+      }
+      flush();
+    });
+    return out.length ? out : RR(t, it);
   }
   /** ป้าย: ตัวหนาทั้งบรรทัด (bold) หรือเฉพาะ **…** */
   function RRB(t, all) { return RR(t, null).map(function (r) { if (all) r.b = true; return r; }); }
@@ -2291,7 +2316,7 @@ var O5DOCX = (function () {
         case 'ap': {
           var close = it.close && nx.k === 'adate', segs = String(it.num ? it.rest : it.t).split('\n');
           segs.forEach(function (seg, si) {
-            var runs = bold(RR(glue(seg), it), it.b), last = si === segs.length - 1, o;
+            var runs = bold(RRA(glue(seg), it), it.b), last = si === segs.length - 1, o;
             if (it.num) {                                           // แขวน: เลขข้อ → TAB → ข้อความ · บรรทัดต่อตรงข้อความหลังเลข
               var lx = tw(it.x + it.nw);
               if (!si) runs = [R(it.num, it.nb), TAB].concat(runs);
@@ -2305,7 +2330,7 @@ var O5DOCX = (function () {
           if (it.num) {                                             // แขวน=ใช่ + ข้อมีเลข: [ป้าย → TAB] → เลข → TAB → ข้อความ · บรรทัดต่อตรงข้อความหลังเลข
             var nl2 = tw(it.x + it.lw), nt = tw(it.x + it.lw + it.nw), nsg = String(it.rest).split('\n'), lab = it.first && it.label;
             nsg.forEach(function (seg, si) {
-              var runs = bold(RR(glue(seg), it), it.b);
+              var runs = bold(RRA(glue(seg), it), it.b);
               if (!si) runs = (lab ? [R(glue(it.label), true), TAB] : []).concat([R(it.num, it.nb), TAB], runs);
               push(P({ jc: 'thaiDistribute', before: si ? 0 : before, widow: true, left: nt, hang: si ? 0 : nt - (lab ? tw(it.x) : nl2), tabs: si ? [] : (lab ? [{ pos: nl2 }] : []).concat([{ pos: nt }]),
                        keepNext: it.close && nx.k === 'adate' || si < nsg.length - 1, keepLines: it.close && nx.k === 'adate' || nsg.length > 1, runs: runs }));
@@ -2314,7 +2339,7 @@ var O5DOCX = (function () {
           }
           var nl = tw(it.x + it.lw), nsegs = String(it.t).split('\n');
           nsegs.forEach(function (seg, si) {
-            var runs = bold(RR(glue(seg), it), it.b);
+            var runs = bold(RRA(glue(seg), it), it.b);
             if (!si && it.first && it.label) runs = [R(glue(it.label), true), TAB].concat(runs);
             push(P({ jc: 'thaiDistribute', before: si ? 0 : before, widow: true, left: nl, hang: !si && it.first && it.label ? nl - tw(it.x) : 0, tabs: !si && it.first && it.label ? [{ pos: nl }] : [],
                      keepNext: it.close && nx.k === 'adate' || si < nsegs.length - 1, keepLines: it.close && nx.k === 'adate' || nsegs.length > 1, runs: runs }));
@@ -2361,11 +2386,11 @@ var O5DOCX = (function () {
             if (it.dot) { sr.push(R('\u2022'), TAB); st.push({ pos: tw(it.lx) }); }
             if (it.label) sr = sr.concat(bold(RR(glue(it.label), null), it.lb));
             sr.push(TAB); st.push({ pos: cxw });
-            push(P(Object.assign(base, { left: cxw, hang: cxw - tw(it.dot ? it.bx : it.lx), tabs: st, runs: sr.concat(RR(glue(it.t), it)) })));
+            push(P(Object.assign(base, { left: cxw, hang: cxw - tw(it.dot ? it.bx : it.lx), tabs: st, runs: sr.concat(RRA(glue(it.t), it)) })));
           } else if (it.num) {
             var lead2 = tw(it.cx + it.nw);
-            push(P(Object.assign(base, { left: lead2, hang: lead2 - cxw, tabs: [{ pos: lead2 }], runs: [R(it.num), TAB].concat(RR(glue(it.rest), it)) })));
-          } else push(P(Object.assign(base, { left: it.cont ? tw(it.cx + it.nw) : cxw, runs: RR(glue(it.t), it) })));
+            push(P(Object.assign(base, { left: lead2, hang: lead2 - cxw, tabs: [{ pos: lead2 }], runs: [R(it.num), TAB].concat(RRA(glue(it.rest), it)) })));
+          } else push(P(Object.assign(base, { left: it.cont ? tw(it.cx + it.nw) : cxw, runs: RRA(glue(it.t), it) })));
           break;
         }
         case 'abox': {                                              // กล่อง: ตาราง 1 ช่องกว้างเต็มเนื้อความ · ข้อความกึ่งกลาง · เว้นก่อน = ระยะหลังย่อหน้าก่อนหน้า
